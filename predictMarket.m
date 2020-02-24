@@ -35,7 +35,7 @@ function [P A] = predictMarket(Y, C, T, Q)
 	% Calculate the overall percentage change in the portfolio
 	% Multiply all percentage increases and decreases in A
 
-	A = A + 1;
+	
 	P = prod(A);
 
 	disp(P)
