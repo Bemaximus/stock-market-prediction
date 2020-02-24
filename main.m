@@ -41,4 +41,4 @@ A = J .* Q;
 A = A + 1;
 P = prod(A);
 
-
+disp(P)
