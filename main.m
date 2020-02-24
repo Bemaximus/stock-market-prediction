@@ -11,6 +11,7 @@ load("stockdata.mat")
 
 % Solve for m in the equation Y * m = C
 % Get the transpose of Y to get Yt * Y * m = Yt * C
+% Haha gonna fuck up this merge
 
 Yt = transpose(Y);
 YtY = Yt * Y;
@@ -42,3 +43,5 @@ A = A + 1;
 P = prod(A);
 
 disp(P)
+
+
