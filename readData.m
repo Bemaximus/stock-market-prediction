@@ -2,7 +2,7 @@
 	Read data from a csv and convert it into test and train data
 %}
 
-function [Y C T Q] = readData(ticker)
+function [Y C T Q] = readData(ticker, varargin)
 	flatten = @(arr) reshape(arr, numel(arr), 1);
 
 	% Open up the csv of all JNUG data
@@ -10,10 +10,10 @@ function [Y C T Q] = readData(ticker)
 	% Oldest data comes first
 	stockData = flipud(readmatrix(strcat("data/", ticker, ".csv")));
 	if size(stockData, 2) == 7
-		stockData = stockData(:,2:5)
+		stockData = stockData(:,2:5);
 	end
 
-	jnugSize = size(stockData)
+	jnugSize = size(stockData);
 	clear jnugSize
 
 	trainStockData = stockData(1:end-200,:);
@@ -42,7 +42,7 @@ function [Y C T Q] = readData(ticker)
 
 		% Combine the data for previous days and current opening price
 		last10Days(end + 1) = newOpenPrice;
-
+		
 		% Only capture percentage data, remove dollars
 		last10Days = last10Days / firstData;
 

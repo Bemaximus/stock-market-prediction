@@ -18,14 +18,13 @@ function [P A] = predictMarket(Y, C, T, Q, ticker)
 	% Solve for estimated percentage increases, G, given test data T
 	% D is the absolute percentage measured by G - 1
 
-	G = T * m
+	G = T * m;
 	D = G - 1;
 
 	% Determine the percentage of the portfolio invested
 	% (negative for selling short)
 
-	J = constrain(-1, 1, 20 * D)
-	Q
+	J = constrain(-1, 1, 20 * D);
 
 	% Determine the percentage gain in the portfolio on each day
 	% Given the actual percentage gain A
