@@ -8,7 +8,7 @@ function [Y C T Q] = readData(ticker)
 	% Open up the csv of all JNUG data
 
 	% Oldest data comes first
-	stockData = flipud(readmatrix(strcat(ticker, ".csv")));
+	stockData = flipud(readmatrix(strcat("data/", ticker, ".csv")));
 	if size(stockData, 2) == 7
 		stockData = stockData(:,2:5)
 	end
@@ -82,5 +82,5 @@ function [Y C T Q] = readData(ticker)
 		Q(j) = percentageIncrease;
 	end
 
-	save(strcat(ticker,".mat"), "Y", "C", "T", "Q", "stockData")
+	save(strcat("models/", ticker,".mat"), "Y", "C", "T", "Q", "stockData")
 end

@@ -39,5 +39,5 @@ function [P A] = predictMarket(Y, C, T, Q, ticker)
 	P = prod(A);
 
 	disp(P)
-	save(strcat(ticker, "_predict.mat"))
+	save(strcat("models/", ticker, "_predict.mat"))
 end
