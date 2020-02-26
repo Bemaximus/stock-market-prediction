@@ -58,14 +58,14 @@ function [Y C T Q] = readData(ticker, varargin)
 		j = i - 10;
 		
 		% Last 10 days of data
-		last10Days = flatten(testStockData(j:i-1,:))
+		last10Days = flatten(testStockData(j:i-1,:));
 
 		% This is the first opening price
 		firstData = last10Days(1);
 		
 		% This is info for the day we're testing
-		newOpenPrice = testStockData(i,1)
-		newClosePrice = testStockData(i,4)
+		newOpenPrice = testStockData(i,1);
+		newClosePrice = testStockData(i,4);
 
 		% This is the percentage increase in a day
 		% What we're looking for
@@ -81,6 +81,9 @@ function [Y C T Q] = readData(ticker, varargin)
 		T(j,:) = last10Days;
 		Q(j) = percentageIncrease;
 	end
-
+	Y
+	C
+	T
+	Q
 	save(strcat("models/", ticker,".mat"), "Y", "C", "T", "Q", "stockData")
 end

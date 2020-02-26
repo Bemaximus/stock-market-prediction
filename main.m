@@ -3,10 +3,13 @@
 	KAZDAQ
 %}
 
-ticker = "NUGT";
-todayOpening = 98.54;
+ticker = "AAPL" % choose the ticker
+todayOpening = 98.54; % input today's opening price
+downloadData = true; % download data from Yahoo Finance (linux only)
 
 % https://eodhistoricaldata.com/api/eod/AAPL.US?from=2017-01-05&to=2017-02-10&api_token=OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX&period=d
+
+format compact
 
 [Y C T Q] = readData(ticker);
 
