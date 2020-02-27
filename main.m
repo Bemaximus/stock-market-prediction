@@ -3,9 +3,8 @@
 	KAZDAQ
 %}
 
-ticker = "AAPL" % choose the ticker
-todayOpening = 98.54; % input today's opening price
-downloadData = true; % download data from Yahoo Finance (linux only)
+ticker = "SQ" % choose the ticker
+todayOpening = 81.85; % input today's opening price
 
 % https://eodhistoricaldata.com/api/eod/AAPL.US?from=2017-01-05&to=2017-02-10&api_token=OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX&period=d
 
@@ -22,7 +21,6 @@ format compact
 
 % Predict today's price
 
-%{
 % Load the stock data
 load(strcat("models/", ticker, ".mat"), "stockData");
 last10days = stockData(1:10, :);
@@ -37,6 +35,5 @@ last10days = last10days / last10days(1)
 load(strcat("models/", ticker, "_predict.mat"), "m");
 
 estimatedIncrease = transpose(last10days) * m
-%}
 
-disp(P)
+P
