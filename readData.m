@@ -13,8 +13,8 @@ function [Y C T Q] = readData(ticker, varargin)
 		stockData = stockData(:,2:5);
 	end
 
-	if size(stockData, 1) > 1250
-		stockData = stockData(1:1250, :)
+	if size(stockData, 1) > 1000
+		stockData = stockData(1:1000, :)
 	end
 
 	trainStockData = stockData(1:end-200,:);
