@@ -13,8 +13,9 @@ function [Y C T Q] = readData(ticker, varargin)
 		stockData = stockData(:,2:5);
 	end
 
-	jnugSize = size(stockData);
-	clear jnugSize
+	if size(stockData, 1) > 1250
+		stockData = stockData(1:1250, :)
+	end
 
 	trainStockData = stockData(1:end-200,:);
 
