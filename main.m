@@ -3,8 +3,8 @@
 	KAZDAQ
 %}
 
-ticker = "JNUG" % choose the ticker
-todayOpening = 7.46; % input today's opening price
+ticker = "^IXIC" % choose the ticker
+todayOpening = 8744; % input today's opening price
 
 % https://eodhistoricaldata.com/api/eod/AAPL.US?from=2017-01-05&to=2017-02-10&api_token=OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX&period=d
 
@@ -34,7 +34,7 @@ last10days = last10days / last10days(1)
 % Load the model
 load(strcat("models/", ticker, "_predict.mat"), "m");
 
-% estimatedIncrease = transpose(last10days) * m
+estimatedIncrease = transpose(last10days) * m
 
 P
 disp("hi")
