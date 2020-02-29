@@ -17,9 +17,9 @@ function [Y C T Q] = readData(ticker, varargin)
 		stockData = stockData(1:1000, :)
 	end
 
-	trainStockData = stockData(1:end-200,:);
+	trainStockData = stockData(1:end-250,:);
 
-	testStockData = stockData(end-199:end,:);
+	testStockData = stockData(end-249:end,:);
 
 	Y = zeros(size(trainStockData, 1) - 11, size(trainStockData, 2) * 10 + 1);
 	C = zeros(size(trainStockData, 1) - 11, 1);
