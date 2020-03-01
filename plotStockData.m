@@ -1,5 +1,3 @@
-
-
 function plotStockData(ticker)
 
 % load data
@@ -13,11 +11,15 @@ A_percentageGains = (A - 1) * 100;
 histogram(A_percentageGains, "BinMethod", "sqrt", "FaceColor", "#0066ff")
 title("Percentage gained on " + ticker + " on a given day")
 xlabel("Percentage gained (%)")
-ylabel("Number of days in a year")
+ylabel("Frequency")
 
 % histogram of estimated percentage gains
-% figure(2)
-% D_percentageEstimates = 
+figure(2)
+D_percentageEstimates = abs(D) * 100
+histogram(D_percentageEstimates, "BinMethod", "sqrt", "FaceColor", "#00ff66")
+title("Prediction error on " + ticker + " on a given day")
+xlabel("Percentage error (%)")
+ylabel("Frequency")
 
 % line plot of open/close prices and prediction
 figure(3)
