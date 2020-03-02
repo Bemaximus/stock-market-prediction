@@ -3,7 +3,7 @@ Predicting the stock market using MATLAB and linear regression
 
 Using the opening price, high price, and low price of a stock over two weeks, as well as the current stock opening price, this model predicts the closing price of that stock with about 80% accuracy.
 
-![](models/jnug_gains.png)
+![](output/jnug_gains.png)
 
 [Full Report Here](https://docs.google.com/document/d/1L3u5gKNvpuLp4S4-yjCEbRjHrwH91EEyRn_v-18-4_s/edit?usp=sharing)
 
