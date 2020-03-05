@@ -3,8 +3,8 @@ function plotStockData(ticker)
 flatten = @(arr) reshape(arr, 1, numel(arr))
 
 % load data
-load(strcat("models/", ticker, ".mat")) % test and train data
-load(strcat("models/", ticker, "_predict.mat")) % model predictions
+load(strcat("../models/", ticker, ".mat")) % test and train data
+load(strcat("../models/", ticker, "_predict.mat")) % model predictions
 
 
 % histogram of percentage gains
@@ -76,7 +76,7 @@ todayStock = last11daysMatrix(end, :) / multiplyFactor;
 todayOpening = todayStock(1);
 todayClosing = todayStock(4);
 
-load("models/" + ticker + "_predict.mat", "m");
+load("../models/" + ticker + "_predict.mat", "m");
 
 prevData = flatten(last10daysMatrix)
 prevData(end + 1) = todayOpening

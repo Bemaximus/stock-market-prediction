@@ -8,7 +8,7 @@ function [Y C T Q] = readData(ticker, varargin)
 	% Open up the csv of all JNUG data
 
 	% Oldest data comes first
-	stockData = flipud(readmatrix(strcat("data/", ticker, ".csv")));
+	stockData = flipud(readmatrix(strcat("../data/", ticker, ".csv")));
 	if size(stockData, 2) == 7
 		stockData = stockData(:,2:5);
 	end
@@ -86,5 +86,5 @@ function [Y C T Q] = readData(ticker, varargin)
 	C
 	T
 	Q
-	save(strcat("models/", ticker,".mat"), "Y", "C", "T", "Q", "stockData")
+	save(strcat("../models/", ticker,".mat"), "Y", "C", "T", "Q", "stockData")
 end
