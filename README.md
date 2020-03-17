@@ -21,4 +21,4 @@ The `python/` directory has the python equivalents of the matlab scripts, which 
 
 ## Usage
 
-Change the ticker and opening price script in `matlab/main.m` and run the file. This will run a year-long backtest on the data and predict the percentage increase from the opening price (current price) until closing. This script is meant to be run at 9:30 AM to decide on a short/long position on a desired stock. All funds would be liquidated before closing.
+Change the ticker and opening price in `matlab/main.m` and run the script using MATLAB. This will run a year-long backtest on the data and predict the percentage increase from the opening price (current price) until closing. This script is meant to be run at 9:30 AM to decide on a short/long position on a desired stock. All funds would be liquidated before closing.
