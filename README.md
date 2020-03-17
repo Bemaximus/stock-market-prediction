@@ -15,7 +15,10 @@ The `models/` folder stores mat files (MATLAB workspace) with output data from t
 
 The `output/` folder stores output data in text files.
 
-The root `/` directory has the main matlab script and that script's dependency functions (function files in MATLAB).
+The `matlab/` directory has the main matlab script and that script's dependency functions (function files in MATLAB).
 
-## Statistics
+The `python/` directory has the python equivalents of the matlab scripts, which are still a work in progress.
 
+## Usage
+
+Change the ticker and opening price script in `matlab/main.m` and run the file. This will run a year-long backtest on the data and predict the percentage increase from the opening price (current price) until closing. This script is meant to be run at 9:30 AM to decide on a short/long position on a desired stock. All funds would be liquidated before closing.
