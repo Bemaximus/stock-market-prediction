@@ -1,11 +1,9 @@
 import sys
+import datetime
+import random
 
-from predictMarket import predictMarket
-from readData import readData
-
-
-
-
+from predict_market import backtest, est_perc_increase
+from read_data import load_data, save_data
 
 
 if __name__ == "__main__":
@@ -17,14 +15,14 @@ if __name__ == "__main__":
 	if len(sys.argv) >= 2:
 		ticker = sys.argv[1]
 	else:
-		ticker = input("What stock do you want to test?")
+		ticker = input("What stock do you want to test? ")
 
 	if len(sys.argv) >= 3:
-		openPrice = sys.argv[2]
+		open_price = sys.argv[2]
 	else:
-		openPrice = input("What is the opening price of that stock?\n" + 
-			"Or type 'None' for no opening price")
-		openPrice = None if openPrice in ("None", "") else float(openPrice)
+		open_price = input("What is the opening price of that stock?\n" + 
+			"Or type 'None' for no opening price ")
+		open_price = None if open_price in ("None", "") else float(open_price)
 
-	# ticker and openingPrice are assigned now
+	# ticker and open_price are assigned now
 
