@@ -4,7 +4,7 @@
 %}
 
 ticker = "JNUG"
-todayOpening = 63.72; % input today's opening price
+todayOpening = 8.02; % input today's opening price
 
 % https://eodhistoricaldata.com/api/eod/AAPL.US?from=2017-01-05&to=2017-02-10&api_token=OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX&period=d
 
