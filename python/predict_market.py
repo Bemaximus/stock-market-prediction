@@ -3,6 +3,7 @@ import pandas as pd
 import random
 from datetime import datetime
 import scipy.linalg as la
+import scipy.io
 
 def backtest(Y, C, T, Q, ticker):
 	"""
@@ -51,6 +52,24 @@ def est_perc_increase(ticker, opening_price, date=datetime.today()):
 		currently returns a random number
 	"""
 
+	# hack fix to get MATLAB data for stock predictions
+	# change this when Python analyses are working
+	try:
+		ticker_model = scipy.io.loadmat(f"../models/{ticker}_predict.mat")
+		m = np.array(ticker_model["m"]).flatten()
+		
+		historical_data = pd.read_csv(f"../data/{ticker}.csv")
+		last_2_weeks_data = historical_data.tail(10)
+		last_2_weeks_data = last_2_weeks_data.loc[:,["Open", "High", "Low", "Close"]]
+
+		previous_intraday_data = last_2_weeks_data.values.flatten()
+		all_previous_data = numpy.append(previous_intraday_data, opening_price)
+
+		perc_increase = numpy.prod(m * all_previous_data)
+		return perc_increase
+
+	except Exception:
+		pass
 
 	return random.uniform(0.95, 1.05)
 
