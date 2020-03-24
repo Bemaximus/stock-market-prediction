@@ -63,7 +63,7 @@ def est_perc_increase(ticker, opening_price, date=datetime.today()):
 		last_2_weeks_data = last_2_weeks_data.loc[:,["Open", "High", "Low", "Close"]]
 
 		previous_intraday_data = last_2_weeks_data.values.flatten()
-		all_previous_data = np.append(previous_intraday_data, opening_price)
+		all_previous_data = np.append(previous_intraday_data, opening_price / previous_intraday_data[0])
 
 		perc_increase = np.prod(m * all_previous_data)
 		return perc_increase
