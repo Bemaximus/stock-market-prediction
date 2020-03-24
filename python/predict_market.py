@@ -63,13 +63,13 @@ def est_perc_increase(ticker, opening_price, date=datetime.today()):
 		last_2_weeks_data = last_2_weeks_data.loc[:,["Open", "High", "Low", "Close"]]
 
 		previous_intraday_data = last_2_weeks_data.values.flatten()
-		all_previous_data = numpy.append(previous_intraday_data, opening_price)
+		all_previous_data = np.append(previous_intraday_data, opening_price)
 
-		perc_increase = numpy.prod(m * all_previous_data)
+		perc_increase = np.prod(m * all_previous_data)
 		return perc_increase
 
-	except Exception:
-		pass
+	except Exception as e:
+		print(e)
 
 	return random.uniform(0.95, 1.05)
 
