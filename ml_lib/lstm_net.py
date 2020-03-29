@@ -1,7 +1,9 @@
 import torch
 import torch.nn as nn
 
-class LSTM_Net(nn.Module):
+from .model import Model
+
+class LSTM_Net(Model):
     """
     Pytorch LSTM Network
 
