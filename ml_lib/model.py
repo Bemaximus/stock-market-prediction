@@ -1,4 +1,4 @@
-import os
+from os.path import join
 import torch
 import numpy as np
 
@@ -22,6 +22,6 @@ class Model(nn.module):
             name: Name to save the model as
             checkpoint_dir: Directory in which to save the model
         """
-        model_save_path = os.path.join(checkpoint_dir, f"{name}.pt")
+        model_save_path = join(checkpoint_dir, f"{name}.pt")
         torch.save(self, model_save_path)
         print(f"Model saved to {model_save_path}")
