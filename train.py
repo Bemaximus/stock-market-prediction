@@ -10,10 +10,10 @@ def main(args):
 
     # LOAD DATA HERE
     inputs, labels, input_dim = None, None, None
-    import numpy as np
-    inputs = np.random.random((5000, 16, 64))
-    labels = np.random.random((5000, 1))
-    input_dim = 64
+    # import numpy as np
+    # inputs = np.random.random((5000, 16, 64))
+    # labels = np.random.random((5000, 1))
+    # input_dim = 64
 
     train_loop = TrainLoop(inputs=inputs,
                            labels=labels,
