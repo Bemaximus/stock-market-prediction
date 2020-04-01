@@ -10,6 +10,10 @@ def main(args):
 
     # LOAD DATA HERE
     inputs, labels, input_dim = None, None, None
+    import numpy as np
+    inputs = np.random.random((5000, 16, 64))
+    labels = np.random.random((5000, 1))
+    input_dim = 64
 
     train_loop = TrainLoop(inputs=inputs,
                            labels=labels,
@@ -30,7 +34,7 @@ def main(args):
                            wandb=args.wandb,
                            wandb_name=args.wandb_name,
                            wandb_project=args.wandb_project)
-    train_loop.train()
+    train_loop.train(100)
 
 
 if __name__ == "__main__":
@@ -78,6 +82,10 @@ if __name__ == "__main__":
                         type=float,
                         default=0,
                         help="L2 regularization coefficient (default: 0)")
+    parser.add_argument('--dropout',
+                        type=float,
+                        default=0.5,
+                        help="Dropout coefficient (default: 0.5)")
     parser.add_argument("--hidden-dim",
                         type=int,
                         default=512,

@@ -45,12 +45,12 @@ class TrainLoop:
                                           lr=lr,
                                           weight_decay=l2_penalty)
 
-        # Build DataLoaders
-        self.train_loader, self.test_loader, self.val_loader = \
-                build_loaders(inputs, labels, train_split, val_split)
-
         # Hyperparameters
         self.batch_size = batch_size
+
+        # Build DataLoaders
+        self.train_loader, self.test_loader, self.val_loader = \
+                self.build_loaders(inputs, labels, train_split, val_split)
 
         # Logging parameters
         self.log_period = log_period
@@ -76,14 +76,14 @@ class TrainLoop:
     def build_loaders(self, inputs, labels, train_split, val_split):
         # Calculate test_size to pass to sklearn to get the split we want
         assert train_split + val_split <= 1
-        val_test_size = 1 - train_size
-        test_size = val_size / val_test_size
+        val_test_size = 1 - train_split
+        test_size = val_split / val_test_size
        
         # Split into test / validation / train
         train_inputs, test_inputs, train_labels, test_labels = \
-            train_test_split(inputs, labels, test_size=1-train_size)
+            train_test_split(inputs, labels, test_size=1-val_test_size)
         val_inputs, test_inputs, val_labels, test_labels = \
-            train_test_split(test_inputs, test_labels, test_size=0.5)
+            train_test_split(test_inputs, test_labels, test_size=test_size)
 
         # Build TensorDatasets
         train = TensorDataset(torch.from_numpy(train_inputs),
