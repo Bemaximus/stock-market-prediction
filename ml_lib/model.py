@@ -4,7 +4,7 @@ import numpy as np
 
 from torch import nn
 
-class Model(nn.module):
+class Model(nn.Module):
     """
     Base model class.
     """
