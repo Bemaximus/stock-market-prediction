@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from model import Model
+from ml_lib.model import Model
 
 class LSTM_Net(Model):
     """
