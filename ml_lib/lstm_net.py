@@ -24,7 +24,7 @@ class LSTM_Net(Model):
                  output_dim,
                  hidden_dim,
                  n_layers,
-                 drop_prob=0.5,
+                 dropout=0.5,
                  out_actv=None):
         """
         Constructor.
@@ -35,7 +35,7 @@ class LSTM_Net(Model):
             output_dim: Output dimensions
             hidden_dim: LSTM hidden dimensions
             n_layers: Number of LSTM layers
-            drop_prob: Probability to use for dropout layers. Defaults to 0.5
+            dropout: Probability to use for dropout layers. Defaults to 0.5
             out_actv: Pytroch activation function to use on final output. Is not
             called if None
         """
@@ -44,8 +44,8 @@ class LSTM_Net(Model):
         self.n_layers = n_layers
         self.hidden_dim = hidden_dim
 
-        self.dropout = nn.Dropout(drop_prob)
-        if n_layers == 1: drop_prob = 0
+        self.dropout = nn.Dropout(dropout)
+        if n_layers == 1: dropout = 0
         self.actv = nn.ReLU()
         self.out_actv = out_actv
 
