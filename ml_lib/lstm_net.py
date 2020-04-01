@@ -59,6 +59,9 @@ class LSTM_Net(Model):
             prev_out = neurons
         self.out = nn.Linear(prev_out, output_dim)
 
+        # Convert parameters to float
+        self.float()
+
     def forward(self, x):
         """
         Forward pass of the network
@@ -69,7 +72,7 @@ class LSTM_Net(Model):
         Returns:
             Tensor: Output of size (batch, output_size)
         """
-        x = x.long()
+        x = x.float()
         batch_size = x.size(0)
         lstm_out, self.hidden = self.lstm(x, self.init_hidden(batch_size))
         # Save only the final hidden state for each sequence
@@ -105,10 +108,16 @@ class LSTM_Net(Model):
 
 if __name__ == "__main__":
     # Tests
+    input_dim = 100
+    batch_size = 32
+    seq_len = 16
     model = LSTM_Net(fc=[128],
-                     input_dim=100,
+                     input_dim=input_dim,
                      output_dim=1,
                      hidden_dim=128,
                      n_layers=1,
                      drop_prob=0.5)
-    pass
+    import numpy as np
+    inputs = np.random.random((batch_size, seq_len, input_dim))
+    inputs = torch.from_numpy(inputs)
+    out = model(inputs)
