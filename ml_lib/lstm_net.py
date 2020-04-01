@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from .model import Model
+from model import Model
 
 class LSTM_Net(Model):
     """
@@ -46,7 +46,7 @@ class LSTM_Net(Model):
 
         self.dropout = nn.Dropout(drop_prob)
         if n_layers == 1: drop_prob = 0
-        self.actv = nn.Relu()
+        self.actv = nn.ReLU()
         self.out_actv = out_actv
 
         self.lstm = nn.LSTM(input_dim, hidden_dim, n_layers,
@@ -57,7 +57,7 @@ class LSTM_Net(Model):
         for i,neurons in enumerate(fc):
             self.fc.append(nn.Linear(prev_out, neurons))
             prev_out = neurons
-        self.out = nn.Linear(prev_out, output_size)
+        self.out = nn.Linear(prev_out, output_dim)
 
     def forward(self, x):
         """
@@ -102,3 +102,13 @@ class LSTM_Net(Model):
                       weight.new(self.n_layers, batch_size,
                                  self.hidden_dim).zero_())
         return hidden
+
+if __name__ == "__main__":
+    # Tests
+    model = LSTM_Net(fc=[128],
+                     input_dim=100,
+                     output_dim=1,
+                     hidden_dim=128,
+                     n_layers=1,
+                     drop_prob=0.5)
+    pass
