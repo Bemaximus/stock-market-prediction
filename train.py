@@ -2,7 +2,7 @@ import os
 import pickle
 import argparse
 
-from training_loop import TrainingLoop
+from train_loop import TrainLoop
 
 def main(args):
     # Parse arguments
@@ -11,26 +11,26 @@ def main(args):
     # LOAD DATA HERE
     inputs, labels, input_dim = None, None, None
 
-    training_loop = TrainingLoop(inputs=inputs,
-                                 labels=labels,
-                                 train_split=args.train_split,
-                                 val_split=args.val_split,
-                                 fc=fc,
-                                 input_dim=input_dim,
-                                 output_dim=1,
-                                 hidden_dim=args.hidden_dim,
-                                 n_layers=args.n_layers,
-                                 dropout=args.dropout,
-                                 lr=args.lr,
-                                 batch_size=args.batch_size,
-                                 l2_penalty=args.penalty,
-                                 log_period=args.log_period,
-                                 save_period=args.save_period,
-                                 output_dir=args.output_dir,
-                                 wandb=args.wandb,
-                                 wandb_name=args.wandb_name,
-                                 wandb_project=args.wandb_project)
-    training_loop.train()
+    train_loop = TrainLoop(inputs=inputs,
+                           labels=labels,
+                           train_split=args.train_split,
+                           val_split=args.val_split,
+                           fc=fc,
+                           input_dim=input_dim,
+                           output_dim=1,
+                           hidden_dim=args.hidden_dim,
+                           n_layers=args.n_layers,
+                           dropout=args.dropout,
+                           lr=args.lr,
+                           batch_size=args.batch_size,
+                           l2_penalty=args.penalty,
+                           log_period=args.log_period,
+                           save_period=args.save_period,
+                           output_dir=args.output_dir,
+                           wandb=args.wandb,
+                           wandb_name=args.wandb_name,
+                           wandb_project=args.wandb_project)
+    train_loop.train()
 
 
 if __name__ == "__main__":
