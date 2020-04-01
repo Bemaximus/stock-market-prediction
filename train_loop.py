@@ -81,7 +81,7 @@ class TrainLoop:
        
         # Split into test / validation / train
         train_inputs, test_inputs, train_labels, test_labels = \
-            train_test_split(inputs, labels, test_size=1-val_test_size)
+            train_test_split(inputs, labels, test_size=val_test_size)
         val_inputs, test_inputs, val_labels, test_labels = \
             train_test_split(test_inputs, test_labels, test_size=test_size)
 
@@ -105,16 +105,16 @@ class TrainLoop:
 
     def train(self, epochs):
         self.model.train()
+        self.step = 0
+        print("Training start!")
         for e in range(epochs):
-            run_epoch(e)
+            self.run_epoch(e)
         name = f'state_dict_final.pt'
         self.model.save(name, self.output_dir)
 
     def run_epoch(self, e, val=False):
         # Setup logging metrics
         losses = []
-        accuracy = []
-        auc = []
 
         # Iterate over one epoch
         if val: self.model.eval()
@@ -128,54 +128,37 @@ class TrainLoop:
             output = self.model(titles)
             loss = self.loss_func(output, labels.float())
 
+            # Save logging metrics
+            losses.append(loss.item())
+
             # Calculate and apply gradient
             if not val:
                 loss.backward()
                 self.optimizer.step()
 
-            # Calculate logging metrics
-            prediction = torch.round(output)
-            labels = labels.float().view_as(prediction)
-            correct = np.squeeze(prediction.eq(labels).numpy())
-
-            # Save logging metrics
-            losses.append(loss.item())
-            accuracy.append(correct / self.batch_size)
-            auc.append(roc_auc_score(labels, output.detach()))
-
             # If log period, validate model and log
             if not val and self.step % self.log_period == 0:
-                val_losses, val_accuracy, val_auc = run_model(e, val=True)
-                self.log(losses, accuracy, auc,
-                         val_losses, val_accuracy, val_auc,
-                         e)
+                val_losses = self.run_epoch(e, val=True)
+                self.log(losses, val_losses, e)
             # If save period, save model
             if not val and self.step % self.save_period == 0:
                 name = f'state_dict_{e}_{step}.pt'
                 self.model.save(name, self.output_dir)
         if val: self.model.eval()
+        return losses
     
-    def log(self, train_loss, train_acc, train_auc,
-            val_loss, val_acc, val_auc, e):
+    def log(self, train_loss, val_loss, e):
         # Calculate Metrics
-        avg_train_loss, avg_train_acc, avg_train_auc = \
-                map(np.mean, (train_loss, train_acc, train_auc))
-        avg_val_loss, avg_val_acc, avg_val_auc = \
-                map(np.mean, (val_loss, val_acc, val_auc))
+        avg_train_loss = np.mean(train_loss)
+        avg_val_loss = np.mean(val_loss)
 
         # Print Metrics
         print(f"Epoch: {e} | Step: {self.step}")
         print(f"Loss | Train: {avg_train_loss:.6f} |  Val: {avg_val_loss:.6f}")
-        print(f"Accuracy | Train: {avg_train_acc:.6f} | Val: {avg_val_acc:.6f}")
-        print(f"AUROC | Train: {avg_train_auc:.6f} | Val: {avg_val_auc:.6f}")
         print("")
 
         # If wandb is running, log metrics
         if self.wandb:
-            wandb.log({"Train Accuracy": avg_train_acc,
-                       "Train Loss": avg_train_loss,
-                       "Train AUC": avg_train_auc,
+            wandb.log({ "Train Loss": avg_train_loss,
                        "Validation Accuracy": avg_val_acc,
-                       "Validation Loss": avg_val_loss,
-                       "Validation AUC": avg_val_auc,
                        "Step": step})

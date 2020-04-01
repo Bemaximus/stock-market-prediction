@@ -34,7 +34,7 @@ def main(args):
                            wandb=args.wandb,
                            wandb_name=args.wandb_name,
                            wandb_project=args.wandb_project)
-    train_loop.train(100)
+    train_loop.train(args.epochs)
 
 
 if __name__ == "__main__":
@@ -68,8 +68,8 @@ if __name__ == "__main__":
                         (default: 0.8)')
     parser.add_argument('--batch-size',
                         type=int,
-                        default=512,
-                        help='input batch size for training (default: 512)')
+                        default=128,
+                        help='input batch size for training (default: 128)')
     parser.add_argument('--epochs',
                         type=int,
                         default=100,
