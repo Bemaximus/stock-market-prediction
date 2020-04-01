@@ -50,7 +50,7 @@ class LSTM_Net(Model):
         self.out_actv = out_actv
 
         self.lstm = nn.LSTM(input_dim, hidden_dim, n_layers,
-                            dropout=drop_prob, batch_first=True)
+                            dropout=dropout, batch_first=True)
 
         prev_out = hidden_dim
         self.fc = []
