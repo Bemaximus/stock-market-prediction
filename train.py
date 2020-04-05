@@ -8,12 +8,12 @@ def main(args):
     # Parse arguments
     fc = [int(f) for f in args.fc.split(",")]
 
-    # LOAD DATA HERE
-    inputs, labels, input_dim = None, None, None
-    # import numpy as np
-    # inputs = np.random.random((5000, 16, 64))
-    # labels = np.random.random((5000, 1))
-    # input_dim = 64
+    # Load data
+    with open(args.data, 'rb') as of:
+        save_dict = pickle.load(of)
+    inputs = save_dict["inputs"]
+    labels = save_dict["labels"]
+    input_dim = inputs.shape[-1]
 
     train_loop = TrainLoop(inputs=inputs,
                            labels=labels,
