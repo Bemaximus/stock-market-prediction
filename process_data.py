@@ -13,6 +13,7 @@ def main(filename, seq_len=10):
     inputs = [[] for _ in range(df_len - seq_len)]
     non_seq_inputs = []
     labels = []
+    binary_labels = []
     # Skip the first seq_len values because they do not have historic data
     for i in range(seq_len, df_len):
         start = i - seq_len
@@ -23,13 +24,16 @@ def main(filename, seq_len=10):
             inputs[i - seq_len].append(data)
 
         cur = df.iloc[i]
+        change = cur["Close"] / cur["Open"]
         non_seq_inputs.append(cur["Open"])
-        labels.append(cur["Close"] / cur["Open"])
+        labels.append(change)
+        binary_labels.append(1 if change > 1 else 0)
 
     # Convert to numpy arrays and save processed data
     save_dict = {"inputs": np.asarray(inputs),
                  "non_seq_inputs": np.asarray(non_seq_inputs),
-                 "labels": np.asarray(labels)}
+                 "labels": np.asarray(labels),
+                 "binary_labels": np.asarray(binary_labels)}
     output_dir = "data"
     os.makedirs(output_dir, exist_ok=True)
     with open(f"{output_dir}/processed_dataset.pickle", 'wb') as sf:
