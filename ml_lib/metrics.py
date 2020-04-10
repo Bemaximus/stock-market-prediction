@@ -2,14 +2,14 @@ import torch
 from torch.nn import MSELoss
 from sklearn.metrics import r2_score, roc_auc_score
 
-METRICS = dict()
+METRIC_FUNCS = dict()
 
 def register(name):
     """
     Decorator to store metric functions into METRIC dict for easy lookup
     """
     def register_decorator(func):
-        METRICS[name] = func
+        METRIC_FUNCS[name] = func
         return func
     return register_decorator
 
