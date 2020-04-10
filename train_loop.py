@@ -8,7 +8,7 @@ from sklearn.metrics import roc_auc_score
 import numpy as np
 
 from ml_lib.lstm_net import LSTM_Net
-from ml_lib.metrics import calc_r2
+from ml_lib.metrics import METRIC_FUNCS
 
 
 class TrainLoop:
@@ -27,6 +27,7 @@ class TrainLoop:
                  lr=0.005,
                  batch_size=128,
                  l2_penalty=0,
+                 metrics=(),
                  log_period=25,
                  save_period=100,
                  output_dir="/tmp/model_output",
@@ -54,6 +55,7 @@ class TrainLoop:
                 self.build_loaders(inputs, labels, train_split, val_split)
 
         # Logging parameters
+        self.metrics = metrics
         self.log_period = log_period
         self.save_period = save_period
         self.wandb = wandb
@@ -70,9 +72,9 @@ class TrainLoop:
                            project=wandb_project)
             else:
                 wandb.init(project=wandb_project)
-            wandb.watch(model)
-            self.wandb = True
-        else: self.wandb = False
+            wandb.watch(self.model)
+            self.wandb = wandb
+        else: self.wandb = None
 
     def build_loaders(self, inputs, labels, train_split, val_split):
         # Calculate test_size to pass to sklearn to get the split we want
@@ -107,10 +109,8 @@ class TrainLoop:
     def train(self, epochs):
         self.model.train()
         self.step = 0
-        # Setup logging metrics
-        metrics = ("Loss", "R2")
-        self.train_metrics = {m: [] for m in metrics}
-        self.val_metrics = {m: [] for m in metrics}
+        self.train_log = {m: [] for m in ("Loss",) + self.metrics}
+        self.val_log = {m: [] for m in ("Loss",) + self.metrics}
 
         print("Training start!")
         for e in range(epochs):
@@ -119,63 +119,56 @@ class TrainLoop:
         self.model.save(name, self.output_dir)
 
     def run_epoch(self, e, val=False):
-        # Iterate over one epoch
         if val: self.model.eval()
-        # Grab appropriate loader and metrics for evaluation type
         loader = self.val_loader if val else self.train_loader
-        metrics = self.val_metrics if val else self.train_metrics
+        metrics_log = self.val_log if val else self.train_log
         for titles, labels in loader:
             if not val:
                 self.step += 1
                 self.model.zero_grad()
 
-            # Get output and calculate loss
             output = self.model(titles)
             loss = self.loss_func(output, labels.float())
 
-            # Calculate metrics
-            r2 = calc_r2(output, labels)
+            metrics_log["Loss"].append(loss.item())
+            for metric in self.metrics:
+                # Lookup the function for the metric we are evaluating in
+                # METRIC_FUNCS, then save the resulting value to the log of that
+                # metric in metrics_log
+                metrics_log[metric].append(METRIC_FUNCS[metric](labels, output))
 
-            # Save logging metrics
-            metrics["Loss"].append(loss.item())
-            metrics["R2"].append(r2)
-
-            # Calculate and apply gradient
             if not val:
                 loss.backward()
                 self.optimizer.step()
 
-            # If log period, validate model and log
             if not val and self.step % self.log_period == 0:
                 self.run_epoch(e, val=True)
-                self.log(self.train_metrics, self.val_metrics, e)
+                self.log(self.train_log, self.val_log, e)
                 # Reset metrics after logging
-                metrics = self.train_metrics = {key: [] for key in metrics}
-                self.val_metrics = {key: [] for key in metrics}
-            # If save period, save model
+                metrics_log = self.train_log = {key: [] for key in metrics_log}
+                self.val_log = {key: [] for key in metrics_log}
             if not val and self.step % self.save_period == 0:
                 name = f'state_dict_{e}_{self.step}.pt'
                 self.model.save(name, self.output_dir)
         if val: self.model.eval()
-        return metrics
     
-    def log(self, train_metrics, val_metrics, e):
+    def log(self, train_log, val_log, e):
         # Calculate averages
-        train_metrics = {k:np.mean(m) for k,m in train_metrics.items()}
-        val_metrics = {k:np.mean(m) for k,m in val_metrics.items()}
+        train_log = {k:np.mean(m) for k,m in train_log.items()}
+        val_log = {k:np.mean(m) for k,m in val_log.items()}
 
         # Print metrics
         print(f"Epoch: {e} | Step: {self.step}")
-        for metric in train_metrics:
-            train_avg, val_avg = train_metrics[metric], val_metrics[metric]
+        for metric in train_log:
+            train_avg, val_avg = train_log[metric], val_log[metric]
             print(f"{metric} | Train: {train_avg:.6f} | Val: {val_avg:.6f}")
         print("")
 
         # If wandb is running, log metrics
         # Hardcoded for now, think about changing in the future
         if self.wandb:
-            wandb.log({"Train Loss": train_metrics["Loss"],
-                       "Train R2": train_metrics["R2"],
-                       "Validation Loss": train_metrics["Loss"],
-                       "Validation R2": val_metrics["R2"],
-                       "Step": step})
+            self.wandb.log({"Train Loss": train_log["Loss"],
+                            "Train R2": train_log["R2"],
+                            "Validation Loss": train_log["Loss"],
+                            "Validation R2": val_log["R2"],
+                            "Step": self.step})
