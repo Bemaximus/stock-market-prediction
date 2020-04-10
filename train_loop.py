@@ -34,7 +34,6 @@ class TrainLoop:
                  wandb=False,
                  wandb_name=None,
                  wandb_project=None):
-        # Build model, loss function and optimizer
         self.model = LSTM_Net(fc=fc,
                               input_dim=input_dim,
                               output_dim=output_dim,
@@ -47,20 +46,16 @@ class TrainLoop:
                                           lr=lr,
                                           weight_decay=l2_penalty)
 
-        # Hyperparameters
         self.batch_size = batch_size
 
-        # Build DataLoaders
         self.train_loader, self.test_loader, self.val_loader = \
                 self.build_loaders(inputs, labels, train_split, val_split)
 
-        # Logging parameters
         self.metrics = metrics
         self.log_period = log_period
         self.save_period = save_period
         self.wandb = wandb
 
-        # Create output directory is it doesn't exist
         makedirs(output_dir, exist_ok=True)
         self.output_dir = output_dir
 
@@ -96,7 +91,6 @@ class TrainLoop:
         test = TensorDataset(torch.from_numpy(test_inputs),
                              torch.from_numpy(test_labels))
 
-        # Build DataLoaders
         train_loader = DataLoader(train, shuffle=True,
                                   batch_size=self.batch_size, drop_last=True)
         test_loader = DataLoader(test, shuffle=True,
@@ -153,22 +147,17 @@ class TrainLoop:
         if val: self.model.eval()
     
     def log(self, train_log, val_log, e):
-        # Calculate averages
-        train_log = {k:np.mean(m) for k,m in train_log.items()}
-        val_log = {k:np.mean(m) for k,m in val_log.items()}
+        train_metrics = {k:np.mean(m) for k,m in train_log.items()}
+        val_metrics = {k:np.mean(m) for k,m in val_log.items()}
 
-        # Print metrics
         print(f"Epoch: {e} | Step: {self.step}")
-        for metric in train_log:
-            train_avg, val_avg = train_log[metric], val_log[metric]
+        for metric in self.metrics:
+            train_avg, val_avg = train_metrics[metric], val_metrics[metric]
             print(f"{metric} | Train: {train_avg:.6f} | Val: {val_avg:.6f}")
         print("")
 
-        # If wandb is running, log metrics
-        # Hardcoded for now, think about changing in the future
         if self.wandb:
-            self.wandb.log({"Train Loss": train_log["Loss"],
-                            "Train R2": train_log["R2"],
-                            "Validation Loss": train_log["Loss"],
-                            "Validation R2": val_log["R2"],
-                            "Step": self.step})
+            concat = dict([("Train " + k, v) for k,v in train_metrics.items()] +
+                          [("Val " + k, v) for k,v in val_metrics.items()] +
+                          [("Step", self.step)])
+            self.wandb.log(concat)
