@@ -40,7 +40,12 @@ def train_model(ticker):
 		model_dict = pickle.load(handle)
 	Y = np.array(model_dict.get("Y"))
 	C = np.array(model_dict.get("C"))
-	m, _, _, _ = np.linalg.lstsq(Y, C, rcond= None)
+	Yt = Y.transpose()
+	YtY = np.dot(Yt, Y)
+	YtC = np.dot(Yt, C)
+	#Both solutions yield the same answer
+	m= np.linalg.solve(YtY, YtC)
+	#m, _, _, _ = np.linalg.lstsq(Y, C, rcond= None)
 	with open(dir_path + f"/models/{ticker}_model.p", 'wb') as fp:
 		pickle.dump(m, fp)
 	return m
@@ -103,4 +108,4 @@ if __name__ == "__main__":
 	#ticker = input("What stock do you want to test? ")
 	#opening_price = input("What is the opening price?")
 	train_model('AAPL')
-	est_perc_increase('AAPL', 1000)
+	est_perc_increase('AAPL', 250)
