@@ -12,8 +12,10 @@ def main(args):
     with open(args.data, 'rb') as of:
         save_dict = pickle.load(of)
     inputs = save_dict["inputs"]
-    labels = save_dict["labels"]
     input_dim = inputs.shape[-1]
+    labels = save_dict["labels"]
+
+    metrics = ("r2",)
 
     train_loop = TrainLoop(inputs=inputs,
                            labels=labels,
@@ -28,6 +30,7 @@ def main(args):
                            lr=args.lr,
                            batch_size=args.batch_size,
                            l2_penalty=args.penalty,
+                           metrics=metrics,
                            log_period=args.log_period,
                            save_period=args.save_period,
                            output_dir=args.output_dir,
@@ -73,11 +76,11 @@ if __name__ == "__main__":
     parser.add_argument('--epochs',
                         type=int,
                         default=100,
-                        help='number of epochs to train (default: 10)')
+                        help='number of epochs to train (default: 100)')
     parser.add_argument('--lr',
                         type=float,
                         default=0.005,
-                        help='learning rate (default: 0.01)')
+                        help='learning rate (default: 0.005)')
     parser.add_argument('--penalty',
                         type=float,
                         default=0,
@@ -117,7 +120,7 @@ if __name__ == "__main__":
                         help="WandB run name")
     parser.add_argument('--wandb-project',
                         type=str,
-                        default="stock_predictions",
-                        help="WandB project name (default: stock_predictions)")
+                        default="market_prediction",
+                        help="WandB project name (default: market_prediction)")
     args = parser.parse_args()
     main(args)
