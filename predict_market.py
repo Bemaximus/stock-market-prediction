@@ -43,9 +43,9 @@ def train_model(ticker):
 	Yt = Y.transpose()
 	YtY = np.dot(Yt, Y)
 	YtC = np.dot(Yt, C)
-	#Both solutions yield the same answer
-	m= np.linalg.solve(YtY, YtC)
-	#m, _, _, _ = np.linalg.lstsq(Y, C, rcond= None)
+	# Both solutions yield the same answer
+	m = np.linalg.solve(YtY, YtC)
+	# m, _, _, _ = np.linalg.lstsq(Y, C, rcond= None)
 	with open(dir_path + f"/models/{ticker}_model.p", 'wb') as fp:
 		pickle.dump(m, fp)
 	return m
@@ -105,7 +105,7 @@ def est_perc_increase(ticker, opening_price, date=datetime.today()):
 	return random.uniform(0.95, 1.05)
 	'''
 if __name__ == "__main__":
-	#ticker = input("What stock do you want to test? ")
-	#opening_price = input("What is the opening price?")
-	train_model('AAPL')
-	est_perc_increase('AAPL', 250)
+	ticker = input("What stock do you want to test? ")
+	opening_price = input("What is the opening price? ")
+	train_model(ticker)
+	est_perc_increase(ticker, opening_price)

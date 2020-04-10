@@ -19,30 +19,32 @@ def save_data(stock_data):
 	Save the model testing and training data as numpy arrays to a Pickle file
 
 	"""
-	np_stock_data = stock_data.to_numpy()
+	filtered_stock_data = stock_data.loc[:, ["Open", "High", "Low", "Close"]]
+	np_stock_data = filtered_stock_data.to_numpy()
 	num_rows = np.size(np_stock_data, 0)
 	num_rows_train = num_rows - 250
-	Y_unformat = np_stock_data[0:num_rows_train, 0:4]
-	T_unformat = np_stock_data[num_rows_train-1:num_rows,0:4]
-	Q = np.divide(T_unformat[:num_rows-11,[3]], T_unformat[:num_rows-11,[0]])
-	C = np.divide(Y_unformat[:num_rows_train-11,[3]], Y_unformat[:num_rows_train-11,[0]])
+	Y_unformat = np_stock_data[0:num_rows_train, :]
+	T_unformat = np_stock_data[num_rows_train:num_rows, :]
+	Q = np.divide(T_unformat[10:num_rows,[3]], T_unformat[10:num_rows,[0]])
+	C = np.divide(Y_unformat[10:num_rows_train,[3]], Y_unformat[10:num_rows_train,[0]])
 	Y = np.empty((0,41))
 	T = np.empty((0,41))
-	for row in range(np.size(Y_unformat, 0)-11):
+	for row in range(np.size(Y_unformat, 0)-10):
 		first_open = Y_unformat[row,[0]]
-		last_open = Y_unformat[row+11,[0]]
-		formatted_row = Y_unformat[row:row+10, 0:4]
+		last_open = Y_unformat[row+10,[0]]
+		# row 'row+10' isn't used in the line below, only indices 0-9
+		formatted_row = Y_unformat[row:row+10, :]
 		formatted_row = formatted_row.flatten()
 		formatted_row = np.append(formatted_row, last_open)
 		formatted_row = formatted_row/first_open
 		Y = np.append(Y, [formatted_row], axis=0)
-	for row in range(np.size(T_unformat, 0)-11):
+	for row in range(np.size(T_unformat, 0)-10):
 		first_open = T_unformat[row,[0]]
-		last_open = T_unformat[row+11,[0]]
-		formatted_row = T_unformat[row:row+10, 0:4]
+		last_open = T_unformat[row+10,[0]]
+		formatted_row = T_unformat[row:row+10, :]
 		formatted_row = formatted_row.flatten()
 		formatted_row = np.append(formatted_row, last_open)
-		#formatted_row = formatted_row/first_open
+		formatted_row = formatted_row/first_open
 		T = np.append(T, [formatted_row], axis=0)
 	model_dict = {
 		"Y": Y,
@@ -52,7 +54,7 @@ def save_data(stock_data):
 	}
 	with open(dir_path + f"/data/{ticker}_test_train.p", 'wb') as fp:
 		pickle.dump(model_dict, fp)
-	return None
+	return [x.shape for x in model_dict.values()]
 
 if __name__ == "__main__":
 
@@ -61,5 +63,5 @@ if __name__ == "__main__":
 		ticker = sys.argv[1]
 	else:
 		ticker = input("What stock do you want to test? ")
-	save_data(load_data(ticker))
+	print(save_data(load_data(ticker)))
 
