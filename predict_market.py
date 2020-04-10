@@ -4,14 +4,16 @@ import random
 from datetime import datetime
 import scipy.linalg as la
 import scipy.io
-import json
+import pickle
+import os 
+dir_path = os.path.dirname(os.path.realpath(__file__)) 
 
 def backtest(Y, C, T, Q, ticker):
 	"""
 	Using training and testing data,
 	develop a model to predict the
 	stock market and test that model
-
+	
 	Params:
 		Y: Matrix of train data
 		C: "Solutions" to the train data
@@ -31,21 +33,16 @@ def backtest(Y, C, T, Q, ticker):
 
 def train_model(ticker):
 	"""
-	Train a model 
+	Train a model and save it to the models folder
 	
 	"""
-	with open(ticker+'_test_train.txt') as json_file:
-		model_dict = json.load(json_file)
+	with open(dir_path + f'/data/{ticker}_test_train.p', 'rb') as handle:
+		model_dict = pickle.load(handle)
 	Y = np.array(model_dict.get("Y"))
 	C = np.array(model_dict.get("C"))
-	T = np.array(model_dict.get("T"))
-	Q = np.array(model_dict.get("Q"))
-
-	Yt = np.transpose(Y)
-	YtY = Yt * Y
-	YtC = YT *C
-	m = YtC/YtY
-	
+	m, _, _, _ = np.linalg.lstsq(Y, C, rcond= None)
+	with open(dir_path + f"/models/{ticker}_model.p", 'wb') as fp:
+		pickle.dump(m, fp)
 	return m
 	
 
@@ -64,14 +61,23 @@ def est_perc_increase(ticker, opening_price, date=datetime.today()):
 		the percentage increase of the day
 		currently returns a random number
 	"""
-	m = train_model(ticker)
-	with open(ticker + '_test_train.txt') as json_file:
-		model_dict = json.load(json_file)
-		T = np.array(model_dict.get("T"))
-	np.insert(T, 0, opening_price)
-	G = T[0, 10] * m #Check T index
+	with open(dir_path + f"/models/{ticker}_model.p", 'rb') as fp:
+		m = pickle.load(fp)
+	with open(dir_path + f'/data/{ticker}_test_train.p', 'rb') as handle:
+		model_dict = pickle.load(handle)
+	T = np.array(model_dict.get("T"))
+	T_size = np.size(T, 0)
+	T = T[T_size-1,:]
+	T = T.flatten()
+	T_size = np.size(T, 0)
+	np.put(T, T_size-1, opening_price)
+	T = np.divide(T,T[0])
+	G = np.matmul(T, m)
+	print(m)
+	print(T)
+	print(G)
 	return G
-
+	'''
 	# hack fix to get MATLAB data for stock predictions
 	# change this when Python analyses are working
 	try:
@@ -92,6 +98,9 @@ def est_perc_increase(ticker, opening_price, date=datetime.today()):
 		print(e)
 
 	return random.uniform(0.95, 1.05)
-
+	'''
 if __name__ == "__main__":
-	pass
+	#ticker = input("What stock do you want to test? ")
+	#opening_price = input("What is the opening price?")
+	train_model('AAPL')
+	est_perc_increase('AAPL', 1000)
