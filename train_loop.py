@@ -10,6 +10,8 @@ import numpy as np
 from ml_lib.lstm_net import LSTM_Net
 from ml_lib.metrics import METRIC_FUNCS
 
+LOSS_FUNCS = {"MSE": nn.MSELoss,
+              "BCE": nn.BCEWithLogitsLoss}
 
 class TrainLoop:
     def __init__(self,
@@ -27,6 +29,7 @@ class TrainLoop:
                  lr=0.005,
                  batch_size=128,
                  l2_penalty=0,
+                 loss_func="MSE",
                  metrics=(),
                  log_period=25,
                  save_period=100,
@@ -41,7 +44,7 @@ class TrainLoop:
                               n_layers=n_layers,
                               dropout=dropout,
                               out_actv=out_actv)
-        self.loss_func = nn.MSELoss()
+        self.loss_func = LOSS_FUNCS[loss_func]()
         self.optimizer = torch.optim.Adam(self.model.parameters(),
                                           lr=lr,
                                           weight_decay=l2_penalty)
@@ -51,7 +54,7 @@ class TrainLoop:
         self.train_loader, self.test_loader, self.val_loader = \
                 self.build_loaders(inputs, labels, train_split, val_split)
 
-        self.metrics = metrics
+        self.metrics = ("Loss",) + metrics
         self.log_period = log_period
         self.save_period = save_period
         self.wandb = wandb
@@ -103,8 +106,8 @@ class TrainLoop:
     def train(self, epochs):
         self.model.train()
         self.step = 0
-        self.train_log = {m: [] for m in ("Loss",) + self.metrics}
-        self.val_log = {m: [] for m in ("Loss",) + self.metrics}
+        self.train_log = {m: [] for m in self.metrics}
+        self.val_log = {m: [] for m in self.metrics}
 
         print("Training start!")
         for e in range(epochs):
@@ -125,7 +128,7 @@ class TrainLoop:
             loss = self.loss_func(output, labels.float())
 
             metrics_log["Loss"].append(loss.item())
-            for metric in self.metrics:
+            for metric in self.metrics[1:]:
                 # Lookup the function for the metric we are evaluating in
                 # METRIC_FUNCS, then save the resulting value to the log of that
                 # metric in metrics_log
