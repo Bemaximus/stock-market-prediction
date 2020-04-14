@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from torch.nn import MSELoss
 from sklearn.metrics import r2_score, roc_auc_score
@@ -31,7 +32,7 @@ def calc_r2(labels, outputs):
     # return r2.item()
     return r2_score(labels, outputs.detach())
 
-@register("binary_accuracy")
+@register("Binary Accuracy")
 def calc_binary_accuracy(labels, outputs, thresh=0.5):
     """
     Calculates accuracy score for a set of outputs and labels.
@@ -46,10 +47,10 @@ def calc_binary_accuracy(labels, outputs, thresh=0.5):
     correct = prediction.eq(labels)
     correct = np.squeeze(correct.numpy())
     num_correct = np.sum(correct)
-    num_pred = output.size(0)
+    num_pred = outputs.size(0)
     return num_correct / num_pred
 
-@register("auroc")
+@register("AUROC")
 def calc_auroc(labels, outputs):
     """
     Calculates auroc score for a set of outputs and labels.
@@ -58,9 +59,7 @@ def calc_auroc(labels, outputs):
         outputs: tensor of shape (N, *), and is the output being scored
         labels: tensor of shape (N, *), the labels being scored against
     """
-    prediction = torch.round(output)
-    labels = labels.float().view_as(prediction)
-    return roc_auc_score(labels, output.detach())
+    return roc_auc_score(labels, outputs.detach())
 
 if __name__ == "__main__":
     print(METRICS)
