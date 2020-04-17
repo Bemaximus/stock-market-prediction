@@ -5,7 +5,7 @@ from train_loop import TrainLoop
 
 def main(args):
     # Parse arguments
-    fc = [int(f) for f in args.fc.split(",")]
+    fc = [int(f) for f in args.fc.split(",") if f]
 
     # Load data
     with open(args.data, 'rb') as of:
