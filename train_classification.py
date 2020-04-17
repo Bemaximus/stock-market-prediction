@@ -57,9 +57,9 @@ if __name__ == "__main__":
     # Hyperparameters
     parser.add_argument('--fc',
                         type=str,
-                        default="128,64",
+                        default="",
                         help='neurons per fully connected layer, formatted as \
-                        \"a,b,c\". (default: 128,64)')
+                        \"a,b,c\". (default: "")')
     parser.add_argument('--train-split',
                         type=float,
                         default=0.8,
