@@ -54,8 +54,7 @@ def calc_std(all_means, all_counts, all_variances, true_mean):
     total_counts = sum(all_counts)
     return np.sqrt(top / total_counts)
 
-def main(filenames, seq_len=10, name="processed_dataset"):
-    inputs, non_seq_inputs, labels, binary_labels = [], [], [], []
+def main(filenames, seq_len=10, name="processed_dataset", val_size=0.2):
     variables = ["Open", "High", "Low", "Close", "Volume"]
     var_means = {k:[] for k in variables}
     var_variance = {k:[] for k in variables}
@@ -69,11 +68,12 @@ def main(filenames, seq_len=10, name="processed_dataset"):
             print(f"{null_count} null values found! Skipping file.")
             break
         df = df[variables]
+        train, val = train_test_split(df, train_size=val_size)
         for v in variables:
-            var_means[v].append(df[v].mean())
-            var_variance[v].append(df[v].var())
-            var_count[v].append(df[v].size)
-        dfs.append(df)
+            var_means[v].append(train[v].mean())
+            var_variance[v].append(train[v].var())
+            var_count[v].append(train[v].size)
+        dfs.append((train, val))
 
     total_var_means, total_var_std = {}, {}
     for v in variables:
@@ -81,19 +81,32 @@ def main(filenames, seq_len=10, name="processed_dataset"):
         total_var_std[v] = calc_std(var_means[v], var_count[v],
                                     var_variance[v], total_var_means[v])
 
-    for df in dfs:
-        _inputs, _non_seq_inputs, _labels, _binary_labels = \
-                build_sequences(df, seq_len, total_var_means, total_var_std)
-        inputs.extend(_inputs)
-        non_seq_inputs.extend(_non_seq_inputs)
-        labels.extend(_labels)
-        binary_labels.extend(_binary_labels)
+    t_inputs, t_non_seq_inputs, t_labels, t_binary_labels = [], [], [], []
+    v_inputs, v_non_seq_inputs, v_labels, v_binary_labels = [], [], [], []
+    for train, val in dfs:
+        _t_inputs, _t_non_seq_inputs, _t_labels, _t_binary_labels = \
+                build_sequences(train, seq_len, total_var_means, total_var_std)
+        t_inputs.extend(_t_inputs)
+        t_non_seq_inputs.extend(_t_non_seq_inputs)
+        t_labels.extend(_t_labels)
+        t_binary_labels.extend(_t_binary_labels)
+
+        _v_inputs, _v_non_seq_inputs, _v_labels, _v_binary_labels = \
+                build_sequences(val, seq_len, total_var_means, total_var_std)
+        v_inputs.extend(_v_inputs)
+        v_non_seq_inputs.extend(_v_non_seq_inputs)
+        v_labels.extend(_v_labels)
+        v_binary_labels.extend(_v_binary_labels)
 
     # Convert to numpy arrays and save processed data
-    save_dict = {"inputs": np.asarray(inputs),
-                 "non_seq_inputs": np.asarray(non_seq_inputs),
-                 "labels": np.asarray(labels),
-                 "binary_labels": np.asarray(binary_labels)}
+    save_dict = {"train": {"inputs": np.asarray(t_inputs),
+                           "non_seq_inputs": np.asarray(t_non_seq_inputs),
+                           "labels": np.asarray(t_labels),
+                           "binary_labels": np.asarray(t_binary_labels)},
+                 "val": {"inputs": np.asarray(v_inputs),
+                         "non_seq_inputs": np.asarray(v_non_seq_inputs),
+                         "labels": np.asarray(v_labels),
+                         "binary_labels": np.asarray(v_binary_labels)}}
     output_dir = "data"
     os.makedirs(output_dir, exist_ok=True)
     output_file = f"{name}_{seq_len}.pickle"
