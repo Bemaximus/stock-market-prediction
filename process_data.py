@@ -1,4 +1,5 @@
 import os
+import argparse
 import pickle
 
 import glob
@@ -10,30 +11,6 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 
 def build_sequences(df, seq_len, var_mean, var_std):
-    df_len = len(df.index)
-    inputs = []
-    non_seq_inputs = []
-    labels = []
-    binary_labels = []
-    # Skip the first seq_len values because they do not have historic data
-    for i in tqdm(range(seq_len, df_len)):
-        start = i - seq_len
-        # norm_factor = df.iloc[start]["Open"]
-        sequence = []
-        for index,row in df.iloc[start:i].iterrows():
-            # Normalize each datapoint by the first opening value
-            # data = [v / norm_factor if norm_factor > 0 else 0 for v in row]
-            data = [(row[c] - var_mean[c]) / var_std[c] for c in row.keys()]
-            sequence.append(data)
-        cur = df.iloc[i]
-        change = cur["Close"] / cur["Open"]
-        inputs.append(sequence)
-        non_seq_inputs.append(cur["Open"])
-        labels.append(change)
-        binary_labels.append(1 if change > 1 else 0)
-    return inputs, non_seq_inputs, labels, binary_labels
-
-def build_sequences_async(df, seq_len, var_mean, var_std):
     df_len = len(df.index)
     inputs = []
     non_seq_inputs = []
@@ -128,9 +105,29 @@ def main(filenames, seq_len=10, name="processed_dataset"):
         print(f"{k}: {v.shape}")
 
 if __name__ == "__main__":
-    stock = "AAPL"
-    filenames = [f"../../data/{stock}.csv"]
-    main(filenames, name=f"{stock}_dataset")
+    parser = argparse.ArgumentParser("Process csv into sequence")
+    parser.add_argument('--dir',
+                        type=str,
+                        default=None,
+                        help="Directory to full csv files from")
+    parser.add_argument('--file',
+                        type=str,
+                        default=None,
+                        help="File to pull data from")
+    parser.add_argument('--seq',
+                        type=int,
+                        default=10,
+                        help="Sequence length (default: 10)")
+    parser.add_argument('--name',
+                        type=str,
+                        default="processed_data",
+                        help="Output file name (default: processed_data)")
+    args = parser.parse_args()
 
-    # filenames = glob.glob("../../data/*.csv")
-    # main(filenames, name="large_dataset")
+    if args.dir:
+        filenames = glob.glob(f"{args.dir}/*.csv")
+    elif args.file:
+        filenames = [args.file]
+    else:
+        raise ValueError("Please specify a directory or file to pull from")
+    main(filenames, name=args.name, seq_len=args.seq)
