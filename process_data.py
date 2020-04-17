@@ -11,7 +11,31 @@ from sklearn.model_selection import train_test_split
 
 def build_sequences(df, seq_len, var_mean, var_std):
     df_len = len(df.index)
-    inputs = [[] for _ in range(df_len - seq_len)]
+    inputs = []
+    non_seq_inputs = []
+    labels = []
+    binary_labels = []
+    # Skip the first seq_len values because they do not have historic data
+    for i in tqdm(range(seq_len, df_len)):
+        start = i - seq_len
+        # norm_factor = df.iloc[start]["Open"]
+        sequence = []
+        for index,row in df.iloc[start:i].iterrows():
+            # Normalize each datapoint by the first opening value
+            # data = [v / norm_factor if norm_factor > 0 else 0 for v in row]
+            data = [(row[c] - var_mean[c]) / var_std[c] for c in row.keys()]
+            sequence.append(data)
+        cur = df.iloc[i]
+        change = cur["Close"] / cur["Open"]
+        inputs.append(sequence)
+        non_seq_inputs.append(cur["Open"])
+        labels.append(change)
+        binary_labels.append(1 if change > 1 else 0)
+    return inputs, non_seq_inputs, labels, binary_labels
+
+def build_sequences_async(df, seq_len, var_mean, var_std):
+    df_len = len(df.index)
+    inputs = []
     non_seq_inputs = []
     labels = []
     binary_labels = []
