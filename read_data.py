@@ -11,7 +11,6 @@ def load_data(ticker):
 
 	"""
 	stock_data = pd.read_csv(dir_path + f"/../../data/{ticker}.csv", index_col="Date")
-	print(stock_data)
 	return stock_data
 
 def save_data(stock_data):
@@ -21,6 +20,8 @@ def save_data(stock_data):
 	"""
 	filtered_stock_data = stock_data.loc[:, ["Open", "High", "Low", "Close"]]
 	np_stock_data = filtered_stock_data.to_numpy()
+	np_stock_data = np.flipud(np_stock_data)[0:1000,:]
+	print(np_stock_data)
 	num_rows = np.size(np_stock_data, 0)
 	num_rows_train = num_rows - 250
 	Y_unformat = np_stock_data[0:num_rows_train, :]
@@ -36,7 +37,7 @@ def save_data(stock_data):
 		formatted_row = Y_unformat[row:row+10, :]
 		formatted_row = formatted_row.flatten()
 		formatted_row = np.append(formatted_row, last_open)
-		formatted_row = formatted_row/first_open
+		#formatted_row = np.divide(formatted_row,first_open)
 		Y = np.append(Y, [formatted_row], axis=0)
 	for row in range(np.size(T_unformat, 0)-10):
 		first_open = T_unformat[row,[0]]
@@ -44,7 +45,7 @@ def save_data(stock_data):
 		formatted_row = T_unformat[row:row+10, :]
 		formatted_row = formatted_row.flatten()
 		formatted_row = np.append(formatted_row, last_open)
-		formatted_row = formatted_row/first_open
+		#formatted_row = formatted_row/first_open
 		T = np.append(T, [formatted_row], axis=0)
 	model_dict = {
 		"Y": Y,
@@ -52,6 +53,8 @@ def save_data(stock_data):
 		"T": T,
 		"Q": Q
 	}
+	print(Y.shape)
+	print(Y)
 	with open(dir_path + f"/data/{ticker}_test_train.p", 'wb') as fp:
 		pickle.dump(model_dict, fp)
 	return [x.shape for x in model_dict.values()]

@@ -79,7 +79,6 @@ def est_perc_increase(ticker, opening_price, date=datetime.today()):
 	T = np.divide(T,T[0])
 	G = np.matmul(T, m)
 	print(m)
-	print(T)
 	print(G)
 	return G
 	'''
