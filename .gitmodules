@@ -1,0 +1,3 @@
+[submodule "live_trading/stock-market-prediction"]
+	path = live_trading/stock-market-prediction
+	url = https://github.com/intermezzio/stock-market-prediction
