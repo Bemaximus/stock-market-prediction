@@ -128,3 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 strategies/
+
+# Config Files
+live_trading/config/
