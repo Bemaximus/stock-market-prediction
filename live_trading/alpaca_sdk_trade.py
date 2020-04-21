@@ -1,7 +1,7 @@
 import sys
 
 sys.path.insert(0, './config')
-sys.path.insert(0, './stock-market-prediction/strategies/QEA')
+sys.path.insert(0, '../strategies/QEA')
 
 import datetime
 import time
