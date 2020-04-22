@@ -8,17 +8,14 @@ import pickle
 import os 
 dir_path = os.path.dirname(os.path.realpath(__file__)) 
 
-def backtest(Y, C, T, Q, ticker):
+def backtest(ticker="JNUG"):
 	"""
 	Using training and testing data,
 	develop a model to predict the
 	stock market and test that model
 	
 	Params:
-		Y: Matrix of train data
-		C: "Solutions" to the train data
-		T: Matrix of test data
-		Q: "Solutions" to the test data
+		ticker: The ticker to backtest
 
 	Returns:
 		P: Portfolio gain over test data 
@@ -28,7 +25,35 @@ def backtest(Y, C, T, Q, ticker):
 			the test data
 	
 	"""
-	
+	with open(dir_path + f'/data/{ticker}_test_train.p', 'rb') as handle:
+		model_dict = pickle.load(handle)
+	with open(dir_path + f"/models/{ticker}_model.p", 'rb') as fp:
+		m = pickle.load(fp)
+
+	T = model_dict["T"]
+	Q = model_dict["Q"]
+
+	# Guess how much the stock value will increase
+	model_gain_predictions = np.matmul(T, m)
+	model_perc_predictions = model_gain_predictions - 1
+
+	# Determine how much money to invest / short on the stock
+	def allocate_portfolio(est_perc_increase):
+		if est_perc_increase > 0:
+			return 1
+		else:
+			return -1
+
+	allocate_portfolio_vec = np.vectorize(allocate_portfolio)
+	model_portfolio_allocations = allocate_portfolio_vec(model_perc_predictions)
+
+	# Compare portfolio holdings to actual stock gains
+	day_gains = model_portfolio_allocations * (Q - 1) + 1
+	total_percentage_increase = np.prod(day_gains)
+
+	return day_gains, total_percentage_increase
+
+
 
 
 def train_model(ticker):
@@ -44,8 +69,8 @@ def train_model(ticker):
 	YtY = np.dot(Yt, Y)
 	YtC = np.dot(Yt, C)
 	# Both solutions yield the same answer
-	m = np.linalg.solve(YtY, YtC)
-	# m, _, _, _ = np.linalg.lstsq(Y, C, rcond= None)
+	# m = np.linalg.solve(YtY, YtC)
+	m, _, _, _ = np.linalg.lstsq(Y, C, rcond= None)
 	with open(dir_path + f"/models/{ticker}_model.p", 'wb') as fp:
 		pickle.dump(m, fp)
 	return m
@@ -77,6 +102,8 @@ def est_perc_increase(ticker, opening_price, date=datetime.today()):
 	T_size = np.size(T, 0)
 	np.put(T, T_size-1, opening_price)
 	T = np.divide(T,T[0])
+	print("T Shape", T.shape)
+	print("T:", T)
 	G = np.matmul(T, m)
 	print(m)
 	print(G)

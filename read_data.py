@@ -37,7 +37,7 @@ def save_data(stock_data):
 		formatted_row = Y_unformat[row:row+10, :]
 		formatted_row = formatted_row.flatten()
 		formatted_row = np.append(formatted_row, last_open)
-		#formatted_row = np.divide(formatted_row,first_open)
+		formatted_row = np.divide(formatted_row,first_open)
 		Y = np.append(Y, [formatted_row], axis=0)
 	for row in range(np.size(T_unformat, 0)-10):
 		first_open = T_unformat[row,[0]]
@@ -45,7 +45,7 @@ def save_data(stock_data):
 		formatted_row = T_unformat[row:row+10, :]
 		formatted_row = formatted_row.flatten()
 		formatted_row = np.append(formatted_row, last_open)
-		#formatted_row = formatted_row/first_open
+		formatted_row = formatted_row/first_open
 		T = np.append(T, [formatted_row], axis=0)
 	model_dict = {
 		"Y": Y,
@@ -57,7 +57,7 @@ def save_data(stock_data):
 	print(Y)
 	with open(dir_path + f"/data/{ticker}_test_train.p", 'wb') as fp:
 		pickle.dump(model_dict, fp)
-	return [x.shape for x in model_dict.values()]
+	return model_dict
 
 if __name__ == "__main__":
 
@@ -66,5 +66,5 @@ if __name__ == "__main__":
 		ticker = sys.argv[1]
 	else:
 		ticker = input("What stock do you want to test? ")
-	print(save_data(load_data(ticker)))
-
+	model_dict = save_data(load_data(ticker))
+	print([x.shape for x in model_dict.values()])
