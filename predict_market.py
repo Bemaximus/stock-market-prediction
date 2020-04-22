@@ -5,6 +5,7 @@ from datetime import datetime
 import scipy.linalg as la
 import scipy.io
 import pickle
+import sys
 import os 
 dir_path = os.path.dirname(os.path.realpath(__file__)) 
 
@@ -73,10 +74,11 @@ def train_model(ticker):
 	m, _, _, _ = np.linalg.lstsq(Y, C, rcond= None)
 	with open(dir_path + f"/models/{ticker}_model.p", 'wb') as fp:
 		pickle.dump(m, fp)
+	print(m)
 	return m
 	
 
-def est_perc_increase(ticker, opening_price, date=datetime.today()):
+def est_perc_increase(ticker, last_10_days=None, opening_price=None, date=datetime.today()):
 	"""
 	Given a stock and its opening price, predict the percentage
 	increase from opening price to closing price.
@@ -89,21 +91,25 @@ def est_perc_increase(ticker, opening_price, date=datetime.today()):
 	
 	Returns:
 		the percentage increase of the day
-		currently returns a random number
 	"""
 	with open(dir_path + f"/models/{ticker}_model.p", 'rb') as fp:
 		m = pickle.load(fp)
-	with open(dir_path + f'/data/{ticker}_test_train.p', 'rb') as handle:
-		model_dict = pickle.load(handle)
-	T = np.array(model_dict.get("T"))
-	T_size = np.size(T, 0)
-	T = T[T_size-1,:]
-	T = T.flatten()
-	T_size = np.size(T, 0)
-	np.put(T, T_size-1, opening_price)
-	T = np.divide(T,T[0])
-	print("T Shape", T.shape)
-	print("T:", T)
+
+	if opening_price is not None:
+		# This part of the algorithm is not run
+		with open(dir_path + f'/data/{ticker}_test_train.p', 'rb') as handle:
+			model_dict = pickle.load(handle)
+		T = np.array(model_dict.get("T"))
+		T_size = np.size(T, 0)
+		T = T[T_size-1,:]
+		T = T.flatten()
+		T_size = np.size(T, 0)
+		np.put(T, T_size-1, opening_price)
+		T = np.divide(T,T[0])
+		print("T Shape", T.shape)
+		print("T:", T)
+	else:
+		T = last_10_days
 	G = np.matmul(T, m)
 	print(m)
 	print(G)
@@ -131,7 +137,11 @@ def est_perc_increase(ticker, opening_price, date=datetime.today()):
 	return random.uniform(0.95, 1.05)
 	'''
 if __name__ == "__main__":
-	ticker = input("What stock do you want to test? ")
-	opening_price = input("What is the opening price? ")
+	# Assign the ticker
+	if len(sys.argv) >= 2:
+		ticker = sys.argv[1]
+	else:
+		ticker = input("What stock do you want to test? ")
+		# opening_price = input("What is the opening price? ")
 	train_model(ticker)
-	est_perc_increase(ticker, opening_price)
+	# est_perc_increase(ticker, opening_price)
