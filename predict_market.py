@@ -72,6 +72,7 @@ def train_model(ticker):
 	# Both solutions yield the same answer
 	# m = np.linalg.solve(YtY, YtC)
 	m, _, _, _ = np.linalg.lstsq(Y, C, rcond= None)
+	
 	with open(dir_path + f"/models/{ticker}_model.p", 'wb') as fp:
 		pickle.dump(m, fp)
 	print(m)
