@@ -1,5 +1,7 @@
 # Stock Market Prediction
-Predicting the stock market using MATLAB and linear regression
+Predicting the stock market using MATLAB and linear regression. 
+
+### Warning this algorithm does not make money, an error was found in our implementation 
 
 Using the opening price, high price, and low price of a stock over two weeks, as well as the current stock opening price, this model predicts the closing price of that stock with about 80% accuracy.
 
