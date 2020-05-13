@@ -11,6 +11,17 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 
 def build_sequences(df, seq_len, var_mean, var_std):
+    """
+    Builds sequences of prices from a dataframe.
+
+    Parameters:
+        df: Dataframe of stock prices to build from
+        seq_len: Length of the sequence to build
+        var_mean: Dict containing the mean of each variable in the dataframe,
+        calculated over all the data being used
+        var_std: Dict containing the std deviation  of each variable in the
+        dataframe, calculated over all the data being used
+    """
     df_len = len(df.index)
     inputs = []
     non_seq_inputs = []
@@ -19,12 +30,15 @@ def build_sequences(df, seq_len, var_mean, var_std):
     # Skip the first seq_len values because they do not have historic data
     for i in tqdm(range(seq_len, df_len)):
         start = i - seq_len
-        # norm_factor = df.iloc[start]["Open"]
+        norm_factors = {k: ((v - var_mean[k]) / var_std[k])
+                        for k,v in df.iloc[start].iteritems()}
         sequence = []
         for index,row in df.iloc[start:i].iterrows():
-            # Normalize each datapoint by the first opening value
-            # data = [v / norm_factor if norm_factor > 0 else 0 for v in row]
-            data = [(row[c] - var_mean[c]) / var_std[c] for c in row.keys()]
+            # Normalize each datapoint by overall mean, overall std deviation
+            # and the first opening value
+            data = [((v - var_mean[k]) / var_std[k]) / norm_factors[k]
+                    if norm_factors[k] != 0 else 0
+                    for k,v in row.iteritems()]
             sequence.append(data)
         cur = df.iloc[i]
         change = cur["Close"] / cur["Open"]
@@ -54,7 +68,7 @@ def calc_std(all_means, all_counts, all_variances, true_mean):
     total_counts = sum(all_counts)
     return np.sqrt(top / total_counts)
 
-def main(filenames, seq_len=10, name="processed_dataset", val_size=0.2):
+def main(filenames, seq_len=10, name="processed_dataset", train_size=0.8):
     variables = ["Open", "High", "Low", "Close", "Volume"]
     var_means = {k:[] for k in variables}
     var_variance = {k:[] for k in variables}
@@ -68,12 +82,13 @@ def main(filenames, seq_len=10, name="processed_dataset", val_size=0.2):
             print(f"{null_count} null values found! Skipping file.")
             break
         df = df[variables]
-        train, val = train_test_split(df, train_size=val_size)
+        train, val = train_test_split(df, train_size=train_size)
         for v in variables:
             var_means[v].append(train[v].mean())
             var_variance[v].append(train[v].var())
             var_count[v].append(train[v].size)
         dfs.append((train, val))
+    print()
 
     total_var_means, total_var_std = {}, {}
     for v in variables:
@@ -84,6 +99,7 @@ def main(filenames, seq_len=10, name="processed_dataset", val_size=0.2):
     t_inputs, t_non_seq_inputs, t_labels, t_binary_labels = [], [], [], []
     v_inputs, v_non_seq_inputs, v_labels, v_binary_labels = [], [], [], []
     for train, val in dfs:
+        print("Building train sequences...")
         _t_inputs, _t_non_seq_inputs, _t_labels, _t_binary_labels = \
                 build_sequences(train, seq_len, total_var_means, total_var_std)
         t_inputs.extend(_t_inputs)
@@ -91,12 +107,14 @@ def main(filenames, seq_len=10, name="processed_dataset", val_size=0.2):
         t_labels.extend(_t_labels)
         t_binary_labels.extend(_t_binary_labels)
 
+        print("Building validation sequences...")
         _v_inputs, _v_non_seq_inputs, _v_labels, _v_binary_labels = \
                 build_sequences(val, seq_len, total_var_means, total_var_std)
         v_inputs.extend(_v_inputs)
         v_non_seq_inputs.extend(_v_non_seq_inputs)
         v_labels.extend(_v_labels)
         v_binary_labels.extend(_v_binary_labels)
+    print()
 
     # Convert to numpy arrays and save processed data
     save_dict = {"train": {"inputs": np.asarray(t_inputs),
@@ -112,10 +130,11 @@ def main(filenames, seq_len=10, name="processed_dataset", val_size=0.2):
     output_file = f"{name}_{seq_len}.pickle"
     with open(f"{output_dir}/{output_file}", 'wb') as sf:
         pickle.dump(save_dict, sf)
-    print(f"File saved to {output_dir}/{output_file}!")
-    print("Final shapes:")
-    for k,v in save_dict.items():
-        print(f"{k}: {v.shape}")
+    print(f"File saved to {output_dir}/{output_file}!\n")
+    for k,d in save_dict.items():
+        print(f"Final {k} shapes:")
+        for var,data in d.items():
+            print(f"\t{var}: {data.shape}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Process csv into sequence")
