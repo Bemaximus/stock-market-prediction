@@ -12,10 +12,15 @@ def main(args):
         save_dict = pickle.load(of)
     inputs = save_dict["inputs"]
     input_dim = inputs.shape[-1]
-    labels = save_dict["binary_labels"][:, None]
 
-    metrics = ("Binary Accuracy", "AUROC")
-    loss_func = "BCE"
+    if args.regression:
+        labels = save_dict["labels"][:, None]
+        metrics = ("r2",)
+        loss_func = "MSE"
+    else:
+        labels = save_dict["binary_labels"][:, None]
+        metrics = ("Binary Accuracy", "AUROC")
+        loss_func = "BCE"
 
     train_loop = TrainLoop(inputs=inputs,
                            labels=labels,
@@ -108,6 +113,10 @@ if __name__ == "__main__":
                         default=2000,
                         help='how many update steps to wait before saving\
                         (default: 2000)')
+    parser.add_argument('--regression',
+                        default=False,
+                        action='store_true',
+                        help="Run as regression")
 
     # WandB flags
     parser.add_argument('--wandb',
