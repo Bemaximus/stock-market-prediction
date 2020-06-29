@@ -24,5 +24,5 @@ The `live_trading/` directory live trades the algorithm using the Alpaca API
 
 ## Usage
 
-To set up the repository, run `sh setup.sh` in the main folder of the repository. Then, if you want to trade on the market, add your API keys to the `live_trading/config/config.py` folder. \
+To set up the repository, run `sh setup.sh` in the main folder of the repository. Then, if you want to trade on the market, add your [Alpaca](https://alpaca.markets/) API keys to the `live_trading/config/config.py` folder. \
 To run the trading algorithm 24/7, run `nohup python3 live_trading/alpaca_sdk_trade.py auto`. You may want to run this on a virtual machine that stays online forever for optimal results.
