@@ -133,3 +133,6 @@ strategies/
 
 # Config Files
 live_trading/config/
+
+# Dividend data
+data/dividends/*.csv
