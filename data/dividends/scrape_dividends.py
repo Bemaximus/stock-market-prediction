@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-# from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 # from selenium.webdriver.common.keys import Keys
@@ -17,18 +17,19 @@ upcoming_dividends_dates_url = "https://www.marketbeat.com/dividends/ex-dividend
 
 
 ### Function that returns a DataFrame of dividend dates from a given url
-def get_upcoming_dividend_dates(html=None):
+def get_upcoming_dividend_dates(html=None) -> pd.DataFrame:
 
 	# get the html from marketbeat
-	response = html if html else requests.get(upcoming_dividends_dates_url).content
+	html = html if html else requests.get(upcoming_dividends_dates_url).content
 
+	html = split_ticker_and_company(html)
 	# convert the html to an easily manageable DataFrame
-	upcoming_dividends_df = pd.read_html(response)[0]
-	upcoming_dividends_df = upcoming_dividends_df[upcoming_dividends_df["Company"].str.len() < 100]
+	upcoming_dividends_df = pd.read_html(html, parse_dates=True)[0]
+	upcoming_dividends_df = upcoming_dividends_df[upcoming_dividends_df["Ticker"] != '']
 
 	return upcoming_dividends_df
 
-def get_dividends_by_date():
+def get_dividends_by_date() -> pd.DataFrame:
 	"""
 
 	"""
@@ -78,6 +79,10 @@ def get_dividends_by_date():
 
 	return total_df
 
+def filter_ex_dividend_data(data_df) -> pd.DataFrame:
+	pass
+
+
 
 def clickButton(b_id, tries=0):
 	global driver
@@ -90,7 +95,53 @@ def clickButton(b_id, tries=0):
 		# print("clickDelay", b_id)
 		clickButton(b_id=b_id, tries=tries+1)
 
-def get_lazy_ticker_from_company_name(agg_string: str):
+def split_ticker_and_company(html) -> str:
+
+	# create BeautifulSoup object
+	soup = BeautifulSoup(html, "lxml")
+	table = soup.find('table')
+	table_body = table.find('tbody')
+
+	# iterate over all rows in the table
+	rows = table_body.find_all('tr')
+	for row in rows:
+
+		# access the first column's entry
+		ticker_and_company = row.find('td')
+		
+		# extract the ticker and company name, if applicable
+		try:
+			ticker = row.select_one('div .ticker-area').string or ''
+			company = row.select_one('div .title-area').string or ''
+		except:
+			ticker = company = ''
+
+		finally:
+			# create new cells to store this data
+			ticker_td = soup.new_tag('td')
+			ticker_td.string = ticker
+
+			company_td = soup.new_tag('td')
+			company_td.string = company
+
+			# append this data to the end of the table
+			row.append(ticker_td)
+			row.append(company_td)
+
+	# add ticker and company columns to the thead
+	table_head_row = table.select_one('thead tr')
+
+	ticker_th = soup.new_tag("th")
+	ticker_th.string = "Ticker"
+	table_head_row.append(ticker_th)
+
+	company_th = soup.new_tag("th")
+	company_th.string = "Company Name"
+	table_head_row.append(company_th)
+
+	return str(table)
+
+def get_lazy_ticker_from_company_name(agg_string):
 	ticker, _ = re.findall(r"([A-Z]+)([A-Z].*)", agg_string)[0]
 	if 1 <= len(ticker) <= 4:
 		return ticker
