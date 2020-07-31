@@ -25,11 +25,13 @@ def get_upcoming_dividend_dates(html=None) -> pd.DataFrame:
 	html = split_ticker_and_company(html)
 	# convert the html to an easily manageable DataFrame
 	upcoming_dividends_df = pd.read_html(html, parse_dates=True)[0]
-	upcoming_dividends_df = upcoming_dividends_df[upcoming_dividends_df["Ticker"] != '']
+	upcoming_dividends_df = upcoming_dividends_df\
+		.loc[:,["Ticker", "Ex-Dividend Date", "Yield", "Period"]]
+	upcoming_dividends_df = upcoming_dividends_df[upcoming_dividends_df["Ex-Dividend Date"].str.len() < 100]
 
 	return upcoming_dividends_df
 
-def get_dividends_by_date() -> pd.DataFrame:
+def get_all_dividends() -> pd.DataFrame:
 	"""
 
 	"""
@@ -62,27 +64,23 @@ def get_dividends_by_date() -> pd.DataFrame:
 
 			new_entries = get_upcoming_dividend_dates(html=driver.page_source)
 			# print(new_entries.loc[0, "Company"], prev_entries.loc[0, "Company"])
-			while prev_entries is not None and new_entries.loc[0, "Company"] == prev_entries.loc[0, "Company"]:
+			while prev_entries is not None and new_entries.loc[0, "Ticker"] == prev_entries.loc[0, "Ticker"]:
 				time.sleep(0.5)
 				new_entries = get_upcoming_dividend_dates(html=driver.page_source)
 
 			total_df = total_df.append(new_entries) if total_df is not None else new_entries
 
 			prev_entries = new_entries
+			print(f"{new_entries.shape[0]} new entries")
 			dropdown_index += 1
 	except Exception as e:
-		print(e)
+		print(f"Error: {e}")
 		# no more dropdown options
 		return total_df
 
 	total_df["Ticker"] = total_df["Company"].apply(get_lazy_ticker_from_company_name)
 
 	return total_df
-
-def filter_ex_dividend_data(data_df) -> pd.DataFrame:
-	pass
-
-
 
 def clickButton(b_id, tries=0):
 	global driver
@@ -141,13 +139,13 @@ def split_ticker_and_company(html) -> str:
 
 	return str(table)
 
-def get_lazy_ticker_from_company_name(agg_string):
-	ticker, _ = re.findall(r"([A-Z]+)([A-Z].*)", agg_string)[0]
-	if 1 <= len(ticker) <= 4:
-		return ticker
-	else:
-		return None
+# def get_lazy_ticker_from_company_name(agg_string):
+# 	ticker, _ = re.findall(r"([A-Z]+)([A-Z].*)", agg_string)[0]
+# 	if 1 <= len(ticker) <= 4:
+# 		return ticker
+# 	else:
+# 		return None
 
 if __name__ == "__main__":
-	upcoming_dividends_df = get_dividends_by_date()
-	upcoming_dividends_df.to_csv("all_entries_filtered.csv")
+	upcoming_dividends_df = get_all_dividends()
+	upcoming_dividends_df.to_csv("all_entries_filtered.csv", index=False)
