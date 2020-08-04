@@ -27,14 +27,20 @@ def all_tickers_today():
 		if item == today_date:
 			today_ticker_dates_index.append(idx)
 	ticker_list = []
+	# duplicate removal loop
 	for i in today_ticker_dates_index:
-		ticker_list.append(ex_ticker_list[i])
+		if ex_ticker_list[i] in ticker_list:
+			today_ticker_dates_index.remove(i)
+		else:
+			ticker_list.append(ex_ticker_list[i])
+	# print(ticker_list)
+	# print(today_ticker_dates_index)
 	return ticker_list, today_ticker_dates_index
 
 def highest_paying_tickers():
 	ticker_list, ticker_index = all_tickers_today()
-	print(ticker_list)
-	print(ticker_index)
+	# print(ticker_list)
+	# print(ticker_index)
 	data = {'ticker': [],
 			'payout': []}
 	entries_today = pd.DataFrame(data, columns = ['ticker', 'payout'])
@@ -56,7 +62,7 @@ def highest_paying_tickers():
 			new_row = {'ticker': entries['Ticker'][item], 'payout': payout}
 			entries_today = entries_today.append(new_row, ignore_index=True)
 	# print(entries_today)
-	entries_today = entries_today.nlargest(3, ['payout'])
+	entries_today = entries_today.nlargest(2, ['payout'])
 	entries_today.reset_index(drop=True, inplace=True)
 	print(entries_today)
 	return entries_today
