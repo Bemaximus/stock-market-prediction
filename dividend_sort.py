@@ -3,7 +3,8 @@ from datetime import date
 from datetime import datetime, timedelta
 
 entries = pd.read_csv("../../data/dividends/all_entries_filtered.csv")
-entries.fillna('00000')
+# entries = pd.read_csv("../../data/dividends/all_entries_filtered_andrew.csv")
+entries.dropna()
 
 def all_tickers_today():
 	# Note: this outputs the tickers for the next_day's ex-dividend date
@@ -28,14 +29,19 @@ def all_tickers_today():
 			today_ticker_dates_index.append(idx)
 	ticker_list = []
 	# duplicate removal loop
+	today_ticker_dates_index_new = []
 	for i in today_ticker_dates_index:
+		# ticker_list.append(ex_ticker_list[i])
 		if ex_ticker_list[i] in ticker_list:
-			today_ticker_dates_index.remove(i)
+			pass
 		else:
 			ticker_list.append(ex_ticker_list[i])
+			today_ticker_dates_index_new.append(i)
 	# print(ticker_list)
-	# print(today_ticker_dates_index)
-	return ticker_list, today_ticker_dates_index
+	# print(len(ticker_list))
+	# print(today_ticker_dates_index_new)
+	# print(len(today_ticker_dates_index_new))
+	return ticker_list, today_ticker_dates_index_new
 
 def highest_paying_tickers():
 	ticker_list, ticker_index = all_tickers_today()
