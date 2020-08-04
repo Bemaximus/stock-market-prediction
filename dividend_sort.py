@@ -31,8 +31,10 @@ def all_tickers_today():
 		ticker_list.append(ex_ticker_list[i])
 	return ticker_list, today_ticker_dates_index
 
-def highest_paying_3_tickers():
+def highest_paying_tickers():
 	ticker_list, ticker_index = all_tickers_today()
+	print(ticker_list)
+	print(ticker_index)
 	data = {'ticker': [],
 			'payout': []}
 	entries_today = pd.DataFrame(data, columns = ['ticker', 'payout'])
@@ -63,5 +65,6 @@ def highest_paying_3_tickers():
 
 
 if __name__ == '__main__':
-	highest_paying_3_tickers()
+	highest_paying_tickers()
+	# all_tickers_today()
 # output ticker(s) to invest in for the day 
