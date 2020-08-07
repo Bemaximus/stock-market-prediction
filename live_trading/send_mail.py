@@ -6,8 +6,15 @@ try:
 except Exception:
 	yag = yagmail.SMTP("tradestockswithfriends@gmail.com")
 
+try:
+	from config import ALGO_TITLE
+except Exception:
+	ALGO_TITLE = ""
+
 def send_mail(recipient="amascillaro@olin.edu", subject = "Stock API Update", body="test", attachment=[]):
 	global yag
+	if ALGO_TITLE != "":
+		subject = ALGO_TITLE + ": " + subject
 	yag.send(
 	    to=recipient,
 	    subject=subject,

@@ -14,7 +14,7 @@ import alpaca_trade_api as tradeapi
 
 from config import *
 from send_mail import *
-from dividend_sort import highest_paying_tickers
+from alt_dividend_sort import highest_paying_tickers
 
 # load the alpaca account
 api = tradeapi.REST(APCA_API_KEY_ID, APCA_API_SECRET_KEY, api_version='v2', 
