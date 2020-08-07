@@ -1,14 +1,16 @@
 import pandas as pd
 from datetime import date
 from datetime import datetime, timedelta
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__)) 
 
-entries = pd.read_csv("../../data/dividends/all_entries_filtered.csv")
+entries = pd.read_csv(dir_path + "/../../data/dividends/all_entries_filtered.csv")
 entries = entries.dropna()
 
-def all_tickers_today():
+def all_tickers_today(current_date=date.today()):
 	# Note: this outputs the tickers for the next_day's ex-dividend date
 	
-	today = str(date.today() + timedelta(days=1))
+	today = str(current_date + timedelta(days=1))
 	today_date = str(today[5:7]) + '/' + str(today[8:10]) + '/' + str(today[0:4])
 	if today_date[0] == '0':
 		today_date_month = today_date[1]
@@ -41,7 +43,7 @@ def all_tickers_today():
 	# print(today_ticker_dates_index)
 	return today_entries
 
-def highest_paying_tickers():
+def highest_paying_tickers(num_tickers=2):
 	today_tickers = all_tickers_today()
 	# print(ticker_list)
 	# print(ticker_index)
@@ -66,7 +68,7 @@ def highest_paying_tickers():
 			new_row = {'ticker': ticker, 'payout': payout}
 			entries_today = entries_today.append(new_row, ignore_index=True)
 	# print(entries_today)
-	entries_today = entries_today.nlargest(5, ['payout'])
+	entries_today = entries_today.nlargest(num_tickers, ['payout'])
 	entries_today.reset_index(drop=True, inplace=True)
 	print(entries_today)
 	return entries_today
