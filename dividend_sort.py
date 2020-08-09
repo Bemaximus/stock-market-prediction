@@ -1,8 +1,6 @@
 import pandas as pd
 from datetime import date
 from datetime import datetime, timedelta
-import timeboard as tb
-import timeboard.calendars.US as US
 
 entries = pd.read_csv("../../data/dividends/all_entries_filtered.csv")
 # entries = pd.read_csv("../../data/dividends/all_entries_filtered_andrew.csv")
@@ -14,23 +12,18 @@ def all_tickers_today():
 	ex_ticker_list = entries['Ticker']
 	# day shift should normally be at 1, but can be changed to look at future dates
 	day_shift = 1
-	today = str(date.today() + timedelta(days=day_shift))
-	# print(today)
+	today = date.today() + timedelta(days=day_shift)
 
 	# The following checks if today is a weekend and (if True) shifts the date to Monday
-	clnd = US.Weekly8x5()
 	while True:
-		ws = clnd(today)
-		if ws.is_on_duty() == True:
-			# print('is on duty')
-			break
-		else:
+		if today.weekday() == 5 or today.weekday() == 6:
 			day_shift += 1
-			today = str(date.today() + timedelta(days=day_shift))
-			# print(today)
+			today = today + timedelta(days=day_shift)
+		else:
+			break
+	today = str(today)
+	print(today)
 
-
-	# print(clnd)
 	today_date = str(today[5:7]) + '/' + str(today[8:10]) + '/' + str(today[0:4])
 	if today_date[0] == '0':
 		today_date_month = today_date[1]
@@ -48,6 +41,7 @@ def all_tickers_today():
 		if item == today_date:
 			today_ticker_dates_index.append(idx)
 	ticker_list = []
+
 	# duplicate removal loop
 	today_ticker_dates_index_new = []
 	for i in today_ticker_dates_index:
@@ -57,13 +51,9 @@ def all_tickers_today():
 		else:
 			ticker_list.append(ex_ticker_list[i])
 			today_ticker_dates_index_new.append(i)
-	# print(ticker_list)
-	# print(len(ticker_list))
-	# print(today_ticker_dates_index_new)
-	# print(len(today_ticker_dates_index_new))
 	return ticker_list, today_ticker_dates_index_new
 
-def highest_paying_tickers():
+def highest_paying_tickers(top_n):
 	ticker_list, ticker_index = all_tickers_today()
 	# print(ticker_list)
 	# print(ticker_index)
@@ -87,8 +77,8 @@ def highest_paying_tickers():
 			payout = float(entries['Yield'][item][:-1]) / 1
 			new_row = {'ticker': entries['Ticker'][item], 'payout': payout}
 			entries_today = entries_today.append(new_row, ignore_index=True)
-	# print(entries_today)
-	entries_today = entries_today.nlargest(2, ['payout'])
+
+	entries_today = entries_today.nlargest(top_n, ['payout'])
 	entries_today.reset_index(drop=True, inplace=True)
 	print(entries_today)
 	return entries_today
@@ -97,6 +87,6 @@ def highest_paying_tickers():
 
 
 if __name__ == '__main__':
-	highest_paying_tickers()
+	highest_paying_tickers(2)
 	# all_tickers_today()
 # output ticker(s) to invest in for the day 
