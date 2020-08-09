@@ -1,16 +1,36 @@
 import pandas as pd
 from datetime import date
 from datetime import datetime, timedelta
+import timeboard as tb
+import timeboard.calendars.US as US
 
 entries = pd.read_csv("../../data/dividends/all_entries_filtered.csv")
 # entries = pd.read_csv("../../data/dividends/all_entries_filtered_andrew.csv")
-entries.dropna()
+entries = entries.dropna()
 
 def all_tickers_today():
 	# Note: this outputs the tickers for the next_day's ex-dividend date
 	ex_dates_list = entries['Ex-Dividend Date']
 	ex_ticker_list = entries['Ticker']
-	today = str(date.today() + timedelta(days=1))
+	# day shift should normally be at 1, but can be changed to look at future dates
+	day_shift = 1
+	today = str(date.today() + timedelta(days=day_shift))
+	# print(today)
+
+	# The following checks if today is a weekend and (if True) shifts the date to Monday
+	clnd = US.Weekly8x5()
+	while True:
+		ws = clnd(today)
+		if ws.is_on_duty() == True:
+			# print('is on duty')
+			break
+		else:
+			day_shift += 1
+			today = str(date.today() + timedelta(days=day_shift))
+			# print(today)
+
+
+	# print(clnd)
 	today_date = str(today[5:7]) + '/' + str(today[8:10]) + '/' + str(today[0:4])
 	if today_date[0] == '0':
 		today_date_month = today_date[1]
@@ -55,15 +75,15 @@ def highest_paying_tickers():
 			payout = float(entries['Yield'][item][:-1]) / 12
 			new_row = {'ticker': entries['Ticker'][item], 'payout': payout}
 			entries_today = entries_today.append(new_row, ignore_index=True)
-		if entries['Period'][item] == 'quarterly':
+		elif entries['Period'][item] == 'quarterly':
 			payout = float(entries['Yield'][item][:-1]) / 4
 			new_row = {'ticker': entries['Ticker'][item], 'payout': payout}
 			entries_today = entries_today.append(new_row, ignore_index=True)
-		if entries['Period'][item] == 'semi-annual':
+		elif entries['Period'][item] == 'semi-annual':
 			payout = float(entries['Yield'][item][:-1]) / 2
 			new_row = {'ticker': entries['Ticker'][item], 'payout': payout}
 			entries_today = entries_today.append(new_row, ignore_index=True)
-		if entries['Period'][item] == 'annual':
+		elif entries['Period'][item] == 'annual':
 			payout = float(entries['Yield'][item][:-1]) / 1
 			new_row = {'ticker': entries['Ticker'][item], 'payout': payout}
 			entries_today = entries_today.append(new_row, ignore_index=True)
