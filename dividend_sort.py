@@ -1,8 +1,10 @@
 import pandas as pd
 from datetime import date
 from datetime import datetime, timedelta
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__)) 
 
-entries = pd.read_csv("../../data/dividends/all_entries_filtered.csv")
+entries = pd.read_csv(dir_path + "/../../data/dividends/all_entries_filtered.csv")
 # entries = pd.read_csv("../../data/dividends/all_entries_filtered_andrew.csv")
 entries = entries.dropna()
 
