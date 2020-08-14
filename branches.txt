@@ -4,3 +4,4 @@ rnn
 QEA_v2
 candlestick_patterns
 dividends
+headline_scraping
