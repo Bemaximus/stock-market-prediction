@@ -11,7 +11,7 @@ import re
 
 MARKETS = ["NYSE", "NASDAQ"]
 
-def get_all_data(ticker_list):
+def get_all_marketbeat_periods(ticker_list):
 	ticker_list_length = ticker_list.shape[0]
 	ticker_stats = pd.Series([None] * ticker_list_length)
 	for i, ticker in ticker_list.iteritems():
@@ -25,35 +25,52 @@ def get_all_data(ticker_list):
 	return ticker_stats
 
 
-def get_valid_url(ticker):
+def get_marketbeat_period(ticker):
 	"""
 	Try to get a valid url for scraping a ticker on MarketBeat
 	"""
-	# print(ticker)
 
-	possible_ticker_urls = (f"https://www.marketbeat.com/stocks/{m}/{ticker}/dividend/" for m in MARKETS)
+	# Go to the url for this stock
+	url = f"https://www.marketbeat.com/stocks/NASDAQ/{ticker}/dividend/"
 
-	for url in possible_ticker_urls:
-		response = requests.get(url)
-		
-		if response.status_code == 200:
-			break;
-	else:
-		return None
-
-	soup = BeautifulSoup(response.content, "lxml")
-	ticker_stats = soup.select("#cphPrimaryContent_tabDividendHistory div.price-data strong")
-	# print(ticker_stats)
-
-	if len(ticker_stats) != 7:
-		return None
-
-	dividend_occurence = ticker_stats[5].text
-	# print(dividend_occurence)
-
-	return dividend_occurence
+	response = requests.get(url)
 	
+	if response.status_code != 200 or response.url == "https://www.marketbeat.com/stocks/NASDAQ/":
+		return None;
+	elif "dividend" not in response.url:
+		# When the url has the wrong market name (e.g. NASDAQ instead of NYSE)
+		# Marketbeat corrects that but doesn't move you
+		# To the dividend page
+		# Resend a request for the right exchange (from the redirect url)
+		# But to the dividend page
+		response = requests.get(response.url + "dividend/")
+
+	# Parse the html
+	soup = BeautifulSoup(response.content, "lxml")
+	
+	# Find the dividend stats section
+	ticker_stats = soup.select("#cphPrimaryContent_tabDividendHistory .price-data")
+
+	if ticker_stats:
+		# Check for the frequency stat and get the text
+		for stats_html in ticker_stats:
+			text = stats_html.text
+			if "Frequency" in text:
+				print(ticker, "Available on Marketbeat")
+				return stats_html.select("strong")[0].text
+	else:
+		ticker_stats = soup.select("#cphPrimaryContent_tabDividendHistory table tr")
+		for stats_row in ticker_stats:
+			text = stats_row.text
+			if "Frequency" in text:
+				try:
+					return stats_row.select("td")[1].text
+				except:
+					continue
+	
+	return None
 
 if __name__ == "__main__":
-	data_df = pd.read_csv("all_thestreet_dividends.csv")
-	data_df["Occurence"] = get_all_data(data_df["Symbol"])
+	# data_df = pd.read_csv("all_thestreet_dividends.csv")
+	# data_df["Occurence"] = get_all_data(data_df["Symbol"])
+	pass

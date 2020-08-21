@@ -15,6 +15,23 @@ driver = None
 base_url = "https://www.thestreet.com/dividends/index.html"
 ultimate_df = pd.DataFrame()
 
+def filter_data():
+	# Simplify data and remove unwanted tickers
+
+	global ultimate_df
+	# Remove the amount column
+	del ultimate_df["Amount"]
+
+	# Rename columns
+	ultimate_df.rename(columns={
+			"Symbol": "Ticker",
+			"Dividend ExDate": "Ex-Dividend Date"
+		}, inplace=True)
+
+	print(ultimate_df.head())
+	# Remove all tickers with a '.' in them
+	ultimate_df = ultimate_df[~ultimate_df["Ticker"].str.contains(r"\.")]
+
 def get_all_dividends():
 	
 	# initialize Firefox
@@ -30,6 +47,8 @@ def get_all_dividends():
 
 	while select_days_on_calendar():
 		shift_calendar_left_three()
+
+	filter_data()
 
 
 def find_latest_dividend():
@@ -100,7 +119,7 @@ def click_next_page_button():
 
 	global driver
 	assert driver != None
-	actions = ActionChains(driver)
+	# actions = ActionChains(driver)
 
 	try:
 		# click the next button in JavaScript, selenium was a bit buggy with this
